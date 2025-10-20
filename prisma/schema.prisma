@@ -12,4 +12,17 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
+
+model Persona {
+  id        Int      @id @default(autoincrement())
+  name      String
+  role      String
+  tone      String?
+  expertise String?
+  biography String?
+  goal      String?
+  createdAt DateTime @default(now())
+}
+
