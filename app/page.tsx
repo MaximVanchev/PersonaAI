@@ -1,8 +1,15 @@
+'use client';
+
 import { Settings } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 export default function Home() {
+  const handleButtonClick = () => {
+    toast.success("Qj PENIS !!!!"); // Displays a success message
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="flex p-8 sm:p-20">
@@ -30,7 +37,7 @@ export default function Home() {
             </li>
           </ol>
           <div className="rounded-full border border-solid border-transparent transition-colors flex items-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-[1.3rem] font-medium h-15 px-4 mx-auto">
-            <button>
+            <button onClick={ handleButtonClick }>
               Generate
             </button>
           </div>
