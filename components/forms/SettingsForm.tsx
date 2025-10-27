@@ -1,5 +1,4 @@
 
-
 export default function SettingsForm() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -8,6 +7,7 @@ export default function SettingsForm() {
                 Settings
             </div>
             
+
     </form>
     </div>
   );

@@ -67,3 +67,12 @@ enum MessageType {
   BOT
 }
 
+model Document {
+  id            String   @id @default(cuid())
+  fileId        String   // OpenAI file_id
+  originalName  String
+  extractedName String
+  info          String   // summary/description/etc
+  meta          Json?
+  createdAt     DateTime @default(now())
+}
