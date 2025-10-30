@@ -1,4 +1,4 @@
-import { FileDto, FileListDto } from "@/types/index.type";
+import { ConvertedFileDto, FileListDto } from "@/types/index.type";
 
 export async function getFilesNames() : Promise<FileListDto[] | null> {
 
@@ -13,8 +13,8 @@ export async function getFilesNames() : Promise<FileListDto[] | null> {
     return data as FileListDto[];
 }
 
-export async function addFile(params: FileDto) : Promise<FileDto | null> {
-    validateFileParams(params);
+export async function addFile(params: File) : Promise<ConvertedFileDto | null> {
+    //validateFileParams(params);
 
     const res = await fetch('/api/file/create', {
         method: 'POST',
@@ -30,7 +30,7 @@ export async function addFile(params: FileDto) : Promise<FileDto | null> {
         throw new Error(data.message || 'Failed to add file');
     }
 
-    return data as FileDto;
+    return data as ConvertedFileDto;
 }
 
 export async function deleteFile(fileId: number) : Promise<void> {
@@ -44,7 +44,7 @@ export async function deleteFile(fileId: number) : Promise<void> {
     }
 }
 
-function validateFileParams(params: FileDto) {
+function validateFileParams(params: File) {
     throw new Error("Function not implemented.");
 
 }

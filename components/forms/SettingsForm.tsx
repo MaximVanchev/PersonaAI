@@ -1,3 +1,4 @@
+import FileIngestForm from "./FileIngestForm";
 
 export default function SettingsForm() {
   return (
@@ -6,9 +7,9 @@ export default function SettingsForm() {
             <div className="text-[3rem] flex justify-center">
                 Settings
             </div>
-            
+            <FileIngestForm />
 
-    </form>
+        </form>
     </div>
   );
 }

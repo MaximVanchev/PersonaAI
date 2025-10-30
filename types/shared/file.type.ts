@@ -3,7 +3,17 @@ export interface FileListDto {
     id: number;
 }
 
-export interface FileDto {
+export interface ConvertedFileDto {
     name: string;
-    content: string;
+    content: Record<string, any> | string;
+    format: FileFormat
+}
+
+export enum FileFormat {
+    EXCEL = 'xlsx',
+    EXCEL2 = 'xlsb',
+    WORD = 'docx',
+    WORD2 = 'doc',
+    PDF = 'pdf',
+    TEXT = 'txt',
 }

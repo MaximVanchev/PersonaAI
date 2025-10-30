@@ -1,5 +1,7 @@
 "use client";
+import { addFile } from "@/lib/api/files.request";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function FileIngestForm() {
   const [busy, setBusy] = useState(false);
@@ -8,9 +10,16 @@ export default function FileIngestForm() {
       onSubmit={async (e) => {
         e.preventDefault();
         setBusy(true);
-        const fd = new FormData(e.currentTarget as HTMLFormElement);
-        const r = await fetch("/api/ingest", { method: "POST", body: fd });
-        alert(await r.text());
+
+        try{
+          const fd = new FormData(e.currentTarget as HTMLFormElement);
+          const r = await addFile( fd.get("file") as File );
+        }
+        catch(err){
+          console.log(err);
+          toast.error("File upload failed");
+        }
+        
         setBusy(false);
       }}
       className="space-y-3"
