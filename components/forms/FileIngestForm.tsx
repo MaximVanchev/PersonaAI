@@ -12,8 +12,10 @@ export default function FileIngestForm() {
         setBusy(true);
 
         try{
-          const fd = new FormData(e.currentTarget as HTMLFormElement);
-          const r = await addFile( fd.get("file") as File );
+          const formEl = e.currentTarget as HTMLFormElement;
+          const fd = new FormData(formEl); // includes both "file" and "name"
+          await addFile(fd);                // ← send the whole FormData
+          toast.success("Uploaded!");
         }
         catch(err){
           console.log(err);

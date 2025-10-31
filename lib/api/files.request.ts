@@ -13,15 +13,13 @@ export async function getFilesNames() : Promise<FileListDto[] | null> {
     return data as FileListDto[];
 }
 
-export async function addFile(params: File) : Promise<ConvertedFileDto | null> {
+export async function addFile(params: FormData | null) : Promise<ConvertedFileDto | null> {
     //validateFileParams(params);
+
 
     const res = await fetch('/api/file/create', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(params),
+        body: params,
     });
 
     const data = await res.json();
@@ -44,7 +42,7 @@ export async function deleteFile(fileId: number) : Promise<void> {
     }
 }
 
-function validateFileParams(params: File) {
+function validateFileParams(params: FormDataEntryValue) {
     throw new Error("Function not implemented.");
 
 }

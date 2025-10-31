@@ -4,9 +4,14 @@ import * as XLSX from "xlsx";
 
 import { ConvertedFileDto, FileFormat } from "@/types/index.type";
 
-export function convertFileToJSON(file: File): ConvertedFileDto | null {
-    const fileFormat = file.name.split('.').pop()?.toLowerCase();
+export async function convertFileToJSON(entry: FormDataEntryValue | null): Promise<ConvertedFileDto | null> {
+    if (!(entry instanceof File)) {
+    throw new Error("Expected a File in form-data field 'file'.");
+    }
+    const file = entry as File;
 
+    const fileFormat = file.name.split('.').pop()?.toLowerCase();
+    console.log("Detected file format:", fileFormat);
     switch (fileFormat) {
         case FileFormat.EXCEL:
             return { name: file.name , content: convertExcelFileToJson(file) , format: fileFormat} as ConvertedFileDto;
@@ -16,7 +21,7 @@ export function convertFileToJSON(file: File): ConvertedFileDto | null {
     }
 }
 
-export async function convertExcelFileToJson(file: File) {
+async function convertExcelFileToJson(file: File) : Promise<Record<string, any[]>> {
   try {
     // 1️⃣ Read file content as ArrayBuffer
     const arrayBuffer = await file.arrayBuffer();
