@@ -1,5 +1,6 @@
 import { HTTP_STATUS_CODES } from "@/types/shared/httpStatusCode.type";
 import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {

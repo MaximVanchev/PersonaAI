@@ -1,10 +1,12 @@
 "use client";
 import { addFile } from "@/lib/api/files.request";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
 export default function FileIngestForm() {
   const [busy, setBusy] = useState(false);
+  const router = useRouter();
   return (
     <form
       onSubmit={async (e) => {
@@ -23,6 +25,7 @@ export default function FileIngestForm() {
         }
         
         setBusy(false);
+        router.refresh();
       }}
       className="space-y-3"
     >

@@ -16,6 +16,7 @@ export async function POST(req: Request) {
     const file = form.get("file");
 
     const convertedFile = await convertFileToJSON(file);
+    console.log(convertedFile);
     const addedFile = await prisma.file.create({
       data: {
         fileName: convertedFile?.name || "Unnamed",

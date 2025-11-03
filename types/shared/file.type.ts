@@ -5,7 +5,7 @@ export interface FileListDto {
 
 export interface ConvertedFileDto {
     name: string;
-    content: Record<string, any> | string;
+    content: Record<string, any>;
     format: FileFormat
 }
 
