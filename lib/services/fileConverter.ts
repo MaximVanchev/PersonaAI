@@ -77,8 +77,6 @@ async function convertExcelFileToJson(file: File) : Promise<Record<string, any[]
       allSheetsData[sheetName] = rows;
     });
 
-    console.log(allSheetsData);
-
     return allSheetsData;
   } catch (error) {
     console.error("Error converting Excel to JSON:", error);
@@ -140,9 +138,10 @@ async function convertWordFileToJson(file: File) : Promise<Record<string, any[]>
 }
 
 async function convertPdfFileToJson(file: File): Promise<Record<string, any>> {
-  const buffer = Buffer.from(await file.arrayBuffer());
+  try {
+    const buffer = Buffer.from(await file.arrayBuffer());
     
-  const parser = new PDFParse({ data: buffer });
+    const parser = new PDFParse({ data: buffer });
     
     // Get text content
     const textResult: TextResult = await parser.getText();
@@ -160,6 +159,10 @@ async function convertPdfFileToJson(file: File): Promise<Record<string, any>> {
       text: textResult.text,
       pages: textResult.pages,
     };
+  } catch (error) {
+    console.error("Error converting PDF to JSON:", error);
+    throw error;
+  }
 }
 
 async function convertTextFileToJson(file: File): Promise<Record<string, any>> {
