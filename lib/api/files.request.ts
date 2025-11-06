@@ -2,7 +2,9 @@ import { ConvertedFileDto, FileListDto } from "@/types/index.type";
 
 export async function getFilesNames() : Promise<FileListDto[] | null> {
 
-    const res = await fetch('/api/file/names');
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
+    const res = await fetch(`${baseUrl}/api/file/names`);
 
     const data = await res.json();
 
@@ -10,14 +12,13 @@ export async function getFilesNames() : Promise<FileListDto[] | null> {
         throw new Error(data.message || 'Failed to fetch file names');
     }
 
-    return data as FileListDto[];
+    return data.filesNames as FileListDto[];
 }
 
 export async function addFile(params: FormData | null) : Promise<ConvertedFileDto | null> {
     //validateFileParams(params);
 
-
-    const res = await fetch('/api/file/create', {
+    const res = await fetch(`/api/file/create`, {
         method: 'POST',
         body: params,
     });

@@ -1,5 +1,5 @@
 export interface FileListDto {
-    name: string;
+    fileName: string;
     id: number;
 }
 

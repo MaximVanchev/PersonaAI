@@ -7,10 +7,9 @@ import toast from "react-hot-toast";
 export default function FileIngestForm() {
   const [busy, setBusy] = useState(false);
   const router = useRouter();
-  return (
-    <form
-      onSubmit={async (e) => {
-        e.preventDefault();
+
+  const submitFile = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
         setBusy(true);
 
         try{
@@ -26,7 +25,11 @@ export default function FileIngestForm() {
         
         setBusy(false);
         router.refresh();
-      }}
+};
+
+  return (
+    <form
+      onSubmit={submitFile}
       className="space-y-3"
     >
       <input name="file" type="file" required />
