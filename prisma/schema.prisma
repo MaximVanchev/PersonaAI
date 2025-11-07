@@ -20,6 +20,7 @@ model Persona {
   name         String
   role         String
   age          Int
+  gender       String
   tone         String?
   expertise    String?
   biography    String?

@@ -1,7 +1,6 @@
 import { Settings } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import toast from "react-hot-toast";
 
 export default function Home() {
   return (
