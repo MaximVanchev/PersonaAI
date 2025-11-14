@@ -1,5 +1,5 @@
 import { GenerateForm } from "@/components/home/GenerateForm";
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -12,7 +12,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
- } from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Settings } from "lucide-react";
@@ -20,18 +20,18 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
-
   return (
     <div className="min-h-screen flex flex-col">
       <header className="flex p-8 sm:p-20">
         <div className="text-4xl justify-start font-bold tracking-tight">
-          <Link href="/">
-            PersonaAI
-          </Link>
+          <Link href="/">PersonaAI</Link>
         </div>
         <div className="justify-end ml-auto right-0">
           <Link href="/settings">
-            <button aria-label="Settings" className="p-2 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
+            <button
+              aria-label="Settings"
+              className="p-2 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+            >
               <Settings color="white" size="2rem"></Settings>
             </button>
           </Link>
@@ -39,14 +39,6 @@ export default function Home() {
       </header>
       <main className="flex-1 flex items-center justify-center p-8 sm:p-20">
         <div className="flex flex-col gap-[40px] items-center sm:items-start">
-          <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-            <li className="mb-2 tracking-[-.01em]">
-              Generate your AI personas.
-            </li>
-            <li className="tracking-[-.01em]">
-              Start a chat with your AI personas and explore their unique perspectives.
-            </li>
-          </ol>
           <GenerateForm />
         </div>
       </main>
