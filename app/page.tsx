@@ -1,8 +1,26 @@
+import { GenerateForm } from "@/components/home/GenerateForm";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+ } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Settings } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="flex p-8 sm:p-20">
@@ -29,11 +47,7 @@ export default function Home() {
               Start a chat with your AI personas and explore their unique perspectives.
             </li>
           </ol>
-          <div className="rounded-full border border-solid border-transparent transition-colors flex items-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-[1.3rem] font-medium h-15 px-4 mx-auto">
-            <button>
-              Generate
-            </button>
-          </div>
+          <GenerateForm />
         </div>
       </main>
       <footer className="flex gap-[24px] p-8 sm:p-20 items-center justify-center">
