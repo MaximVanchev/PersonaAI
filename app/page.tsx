@@ -1,20 +1,5 @@
 import { GenerateForm } from "@/components/home/GenerateForm";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { PersonaListComponent } from "@/components/home/PersonaListComponent";
 import { getListPersonas } from "@/lib/api/persona.request";
 import { Settings } from "lucide-react";
 import Image from "next/image";
@@ -22,6 +7,7 @@ import Link from "next/link";
 
 export default async function Home() {
   const personas = await getListPersonas();
+  const personaList = Array.isArray(personas) ? personas : [];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -42,7 +28,11 @@ export default async function Home() {
       </header>
       <main className="flex-1 flex items-center justify-center p-8 sm:p-20">
         <div className="flex flex-col gap-[40px] items-center sm:items-start">
-          <GenerateForm />
+          {personaList.length > 0 ? (
+            <PersonaListComponent personas={personaList} />
+          ) : (
+            <GenerateForm />
+          )}
         </div>
       </main>
       <footer className="flex gap-[24px] p-8 sm:p-20 items-center justify-center">

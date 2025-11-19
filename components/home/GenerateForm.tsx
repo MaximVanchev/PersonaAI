@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { Button } from "../ui/button";
+import { Minus, Plus } from "lucide-react";
 import toster from "react-hot-toast";
 import { generatePersonasRequest } from "@/lib/api/persona.request";
 import {
@@ -51,36 +53,66 @@ export function GenerateForm() {
         onSubmit={handleSubmit}
         className="w-full justify-center sm:w-auto mx-auto flex flex-col gap-4"
       >
-        <div className="flex gap-4 items-center justify-center">
-          <div className="flex flex-col gap-2 items-center">
-            <Label htmlFor="maleCount" className="text-sm font-medium">
-              Male
-            </Label>
-            <Input
-              id="maleCount"
-              name="maleCount"
-              type="number"
-              min="0"
-              max="10"
-              className="w-16 h-10 text-center"
-              value={maleCount}
-              onChange={(e) => setMaleCount(e.target.valueAsNumber)}
-            />
+        <div className="flex gap-8 items-center justify-center my-10">
+          <div className="flex flex-col gap-3 items-center">
+            <Label className="text-sm font-medium text-white">Male</Label>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 rounded-full"
+                onClick={() => setMaleCount(Math.max(0, maleCount - 1))}
+                disabled={maleCount <= 0}
+              >
+                <Minus className="h-6 w-6" />
+              </Button>
+              <div className="w-12 h-10 flex items-center justify-center bg-muted rounded-md border">
+                <span className="text-lg font-semibold text-black">
+                  {maleCount}
+                </span>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 rounded-full"
+                onClick={() => setMaleCount(Math.min(10, maleCount + 1))}
+                disabled={maleCount >= 6}
+              >
+                <Plus className="h-6 w-6" />
+              </Button>
+            </div>
           </div>
-          <div className="flex flex-col gap-2 items-center">
-            <Label htmlFor="femaleCount" className="text-sm font-medium">
-              Female
-            </Label>
-            <Input
-              id="femaleCount"
-              name="femaleCount"
-              type="number"
-              min="0"
-              max="10"
-              className="w-16 h-10 text-center"
-              value={femaleCount}
-              onChange={(e) => setFemaleCount(e.target.valueAsNumber)}
-            />
+          <div className="flex flex-col gap-3 items-center">
+            <Label className="text-sm font-medium text-white">Female</Label>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 rounded-full"
+                onClick={() => setFemaleCount(Math.max(0, femaleCount - 1))}
+                disabled={femaleCount <= 0}
+              >
+                <Minus className="h-6 w-6" />
+              </Button>
+              <div className="w-12 h-10 flex items-center justify-center bg-muted rounded-md border">
+                <span className="text-lg font-semibold text-black">
+                  {femaleCount}
+                </span>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 rounded-full"
+                onClick={() => setFemaleCount(Math.min(10, femaleCount + 1))}
+                disabled={femaleCount >= 6}
+              >
+                <Plus className="h-6 w-6" />
+              </Button>
+            </div>
           </div>
         </div>
         <div className="rounded-full border border-solid border-transparent transition-colors flex items-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-[1.3rem] font-medium h-15 px-4 mx-auto">
