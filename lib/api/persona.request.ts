@@ -1,7 +1,9 @@
 import {
+  PersonaChatDto,
   PersonaCountDto,
   PersonaDto,
   PersonaGeneratorDto,
+  PersonaListDto,
 } from "@/types/index.type";
 
 export async function generatePersonasRequest(
@@ -26,7 +28,7 @@ export async function generatePersonasRequest(
   return data as PersonaDto[];
 }
 
-export async function getListPersonas(): Promise<PersonaDto[] | null> {
+export async function getListPersonas(): Promise<PersonaListDto[] | null> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   const res = await fetch(`${baseUrl}/api/persona/all`);
@@ -37,5 +39,23 @@ export async function getListPersonas(): Promise<PersonaDto[] | null> {
     throw new Error(data.message || "Failed to fetch personas");
   }
 
-  return data as PersonaDto[];
+  return data as PersonaListDto[];
+}
+
+export async function getPersonaById(
+  id: number
+): Promise<PersonaChatDto | null> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
+  const res = await fetch(`${baseUrl}/api/persona/${id}`, {
+    method: "GET",
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to fetch persona by ID");
+  }
+
+  return data as PersonaChatDto;
 }

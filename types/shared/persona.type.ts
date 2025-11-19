@@ -13,10 +13,22 @@ export interface PersonaCountDto {
 
 export interface PersonaListDto {
   name: string;
-  id: string;
+  id: number;
 }
 
 export interface PersonaDto {
+  name: string;
+  role: string;
+  age: number;
+  gender: string;
+  tone: string;
+  expertise: string;
+  biography: string;
+  goal: string;
+}
+
+export interface PersonaChatDto {
+  id: number;
   name: string;
   role: string;
   age: number;
