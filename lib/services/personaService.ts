@@ -4,39 +4,40 @@ import {
   PersonaDto,
   PersonaDtoArraySchema,
   PersonaGeneratorDto,
+  PersonaResponseSchema,
 } from "@/types/index.type";
 import { openai } from "@ai-sdk/openai";
-import { streamObject } from "ai";
+import { generateObject } from "ai";
 
 export async function generatePersonas(
   params: PersonaGeneratorDto
 ): Promise<PersonaDto[]> {
-  console.log("Generating with GPT-5.1");
+  console.log("Starting persona generation...");
+
   try {
-    const result = await streamObject({
+    console.log("Calling OpenAI API...");
+
+    const apiPromise = generateObject({
       model: openai("gpt-5.1"),
-      schema: PersonaDtoArraySchema,
+      schema: PersonaResponseSchema,
       prompt: [
         {
           role: "system",
-          content: `You are an expert persona generator. You create detailed and diverse personas based on the provided criteria. Each persona should include the properties of the type PersonaDto.`,
+          content: `You are an expert persona generator. You create detailed and diverse personas based on the provided criteria. Return a JSON object with a "personas" property containing an array of PersonaDto objects.`,
         },
         {
           role: "user",
-          content: `Generate a total of ${params.maleCount + params.femaleCount} unique personas. ${params.maleCount} should be male and ${params.femaleCount} should be female. Use the following files as reference material to inform the personas you create: ${params.files.map((f) => f.fileName).join(", ")}. Ensure that each persona is distinct and well-rounded, with a variety of backgrounds, professions, and characteristics. Format the output as a JSON array of PersonaDto objects.`,
+          content: `Generate a total of ${params.maleCount + params.femaleCount} unique personas. ${params.maleCount} should be male and ${params.femaleCount} should be female. Use the following files as reference material to inform the personas you create: ${params.files.map((f) => f.fileName).join(", ")}. `,
         },
       ],
-      temperature: 0.7,
     });
 
-    const personas = await result.object;
-    console.log("Generated personas successfully:", personas);
-    return personas;
+    const result = await apiPromise;
+
+    console.log("Generated personas successfully:", result.object);
+    return result.object.personas;
   } catch (error) {
     console.error("Error generating personas:", error);
-    if (error instanceof Error) {
-      throw new Error(`Failed to generate personas: ${error.message}`);
-    }
-    throw new Error("Failed to generate personas: Unknown error");
+    throw error;
   }
 }

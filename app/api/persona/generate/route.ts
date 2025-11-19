@@ -1,4 +1,9 @@
-import { HTTP_STATUS_CODES, PersonaCountDto, PersonaGeneratorDto } from "@/types/index.type";
+import {
+  HTTP_STATUS_CODES,
+  PersonaCountDto,
+  PersonaDto,
+  PersonaGeneratorDto,
+} from "@/types/index.type";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { generatePersonas } from "@/lib/services/personaService";
@@ -13,20 +18,20 @@ export async function POST(req: Request) {
   }
 
   try {
-    const requestData = await req.json() as PersonaCountDto;
+    const requestData = (await req.json()) as PersonaCountDto;
     console.log("Received request data:", requestData);
 
     const files = await prisma.file.findMany();
     console.log("Fetched files:", files);
 
-    const data = { files , ...requestData } as PersonaGeneratorDto;
+    const data = { files, ...requestData } as PersonaGeneratorDto;
     console.log("Data for persona generation:", data);
 
-    const generatedPersonas = await generatePersonas(data);
+    const generatedPersonas = (await generatePersonas(data)) as PersonaDto[];
     console.log("Generated personas:", generatedPersonas);
 
     const createdPersonas = await prisma.persona.createMany({
-      data: generatedPersonas
+      data: generatedPersonas,
     });
     console.log("Created personas in DB:", createdPersonas);
 
@@ -34,7 +39,7 @@ export async function POST(req: Request) {
       { message: "Personas generated successfully", createdPersonas },
       { status: HTTP_STATUS_CODES.CREATED }
     );
-  } catch(e : any) {
+  } catch (e: any) {
     console.error("Error generating personas:", e);
     return NextResponse.json(
       { message: e.message },

@@ -12,3 +12,8 @@ export const PersonaDtoSchema = z.object({
 });
 
 export const PersonaDtoArraySchema = z.array(PersonaDtoSchema);
+
+// Wrapper schema for OpenAI API (requires object, not array)
+export const PersonaResponseSchema = z.object({
+  personas: z.array(PersonaDtoSchema),
+});

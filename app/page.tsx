@@ -15,11 +15,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getListPersonas } from "@/lib/api/persona.request";
 import { Settings } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function Home() {
+export default async function Home() {
+  const personas = await getListPersonas();
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="flex p-8 sm:p-20">
