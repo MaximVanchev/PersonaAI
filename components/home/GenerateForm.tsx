@@ -42,7 +42,7 @@ export function GenerateForm() {
 
   return (
     <div>
-      <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
+      <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left text-gray-300">
         <li className="mb-2 tracking-[-.01em]">Generate your AI personas.</li>
         <li className="tracking-[-.01em]">
           Start a chat with your AI personas and explore their unique
@@ -55,20 +55,20 @@ export function GenerateForm() {
       >
         <div className="flex gap-8 items-center justify-center my-10">
           <div className="flex flex-col gap-3 items-center">
-            <Label className="text-sm font-medium text-white">Male</Label>
+            <Label className="text-sm font-medium text-gray-200">Male</Label>
             <div className="flex items-center gap-2">
               <Button
                 type="button"
                 variant="outline"
                 size="icon"
-                className="h-8 w-8 rounded-full"
+                className="h-8 w-8 rounded-full border-gray-600 bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white"
                 onClick={() => setMaleCount(Math.max(0, maleCount - 1))}
                 disabled={maleCount <= 0}
               >
                 <Minus className="h-6 w-6" />
               </Button>
-              <div className="w-12 h-10 flex items-center justify-center bg-muted rounded-md border">
-                <span className="text-lg font-semibold text-black">
+              <div className="w-12 h-10 flex items-center justify-center bg-gray-700 rounded-md border border-gray-600">
+                <span className="text-lg font-semibold text-white">
                   {maleCount}
                 </span>
               </div>
@@ -76,7 +76,7 @@ export function GenerateForm() {
                 type="button"
                 variant="outline"
                 size="icon"
-                className="h-8 w-8 rounded-full"
+                className="h-8 w-8 rounded-full border-gray-600 bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white"
                 onClick={() => setMaleCount(Math.min(10, maleCount + 1))}
                 disabled={maleCount >= 6}
               >
@@ -85,20 +85,20 @@ export function GenerateForm() {
             </div>
           </div>
           <div className="flex flex-col gap-3 items-center">
-            <Label className="text-sm font-medium text-white">Female</Label>
+            <Label className="text-sm font-medium text-gray-200">Female</Label>
             <div className="flex items-center gap-2">
               <Button
                 type="button"
                 variant="outline"
                 size="icon"
-                className="h-8 w-8 rounded-full"
+                className="h-8 w-8 rounded-full border-gray-600 bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white"
                 onClick={() => setFemaleCount(Math.max(0, femaleCount - 1))}
                 disabled={femaleCount <= 0}
               >
                 <Minus className="h-6 w-6" />
               </Button>
-              <div className="w-12 h-10 flex items-center justify-center bg-muted rounded-md border">
-                <span className="text-lg font-semibold text-black">
+              <div className="w-12 h-10 flex items-center justify-center bg-gray-700 rounded-md border border-gray-600">
+                <span className="text-lg font-semibold text-white">
                   {femaleCount}
                 </span>
               </div>
@@ -106,7 +106,7 @@ export function GenerateForm() {
                 type="button"
                 variant="outline"
                 size="icon"
-                className="h-8 w-8 rounded-full"
+                className="h-8 w-8 rounded-full border-gray-600 bg-gray-800 text-gray-200 hover:bg-gray-700 hover:text-white"
                 onClick={() => setFemaleCount(Math.min(10, femaleCount + 1))}
                 disabled={femaleCount >= 6}
               >
@@ -115,7 +115,7 @@ export function GenerateForm() {
             </div>
           </div>
         </div>
-        <div className="rounded-full border border-solid border-transparent transition-colors flex items-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-[1.3rem] font-medium h-15 px-4 mx-auto">
+        <div className="rounded-full border border-gray-600 bg-gradient-to-r from-blue-600 to-purple-600 transition-colors flex items-center text-white gap-2 hover:from-blue-700 hover:to-purple-700 text-[1.3rem] font-medium h-15 px-4 mx-auto shadow-lg">
           <button
             type="submit"
             className={

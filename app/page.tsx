@@ -10,16 +10,21 @@ export default async function Home() {
   const personaList = Array.isArray(personas) ? personas : [];
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <header className="flex p-8 sm:p-20">
         <div className="text-4xl justify-start font-bold tracking-tight">
-          <Link href="/">PersonaAI</Link>
+          <Link
+            href="/"
+            className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent"
+          >
+            PersonaAI
+          </Link>
         </div>
         <div className="justify-end ml-auto right-0">
           <Link href="/settings">
             <button
               aria-label="Settings"
-              className="p-2 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+              className="p-2 rounded-md bg-gray-700 hover:bg-gray-600 transition-colors shadow-lg"
             >
               <Settings color="white" size="2rem"></Settings>
             </button>
@@ -37,7 +42,7 @@ export default async function Home() {
       </main>
       <footer className="flex gap-[24px] p-8 sm:p-20 items-center justify-center">
         <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4 text-gray-300 hover:text-white transition-colors"
           href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
           target="_blank"
           rel="noopener noreferrer"
@@ -48,11 +53,12 @@ export default async function Home() {
             alt="File icon"
             width={16}
             height={16}
+            className="filter invert opacity-70"
           />
           Learn
         </a>
         <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4 text-gray-300 hover:text-white transition-colors"
           href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
           target="_blank"
           rel="noopener noreferrer"
@@ -63,11 +69,12 @@ export default async function Home() {
             alt="Window icon"
             width={16}
             height={16}
+            className="filter invert opacity-70"
           />
           Examples
         </a>
         <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4 text-gray-300 hover:text-white transition-colors"
           href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
           target="_blank"
           rel="noopener noreferrer"
@@ -78,6 +85,7 @@ export default async function Home() {
             alt="Globe icon"
             width={16}
             height={16}
+            className="filter invert opacity-70"
           />
           Go to nextjs.org →
         </a>

@@ -16,7 +16,7 @@ export function PersonaListComponent({
 
   return (
     <div className="w-full max-w-md px-4 sm:px-0">
-      <h2 className="text-2xl font-bold mb-8 sm:mb-20 text-center">
+      <h2 className="text-2xl font-bold mb-8 sm:mb-20 text-center text-white">
         Your AI Personas
       </h2>
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center justify-center">
