@@ -12,9 +12,7 @@ interface PersonaDetailPageProps {
   };
 }
 
-export default async function PersonaDetailPage({
-  params,
-}: PersonaDetailPageProps) {
+export default async function PersonaPage({ params }: PersonaDetailPageProps) {
   const data = await params;
   const persona = await getPersonaById(Number(data.id));
   const conversations = await getConversationsByPersonaId(Number(data.id));
