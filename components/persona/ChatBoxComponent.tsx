@@ -7,10 +7,10 @@ import { useState } from "react";
 
 export default function ChatBoxComponent({
   persona,
-  //conversations,
+  conversations,
 }: {
   persona: PersonaChatDto;
-  //conversations: ConversationDto[];
+  conversations: ConversationDto[] | null;
 }) {
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({

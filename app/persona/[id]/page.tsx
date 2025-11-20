@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getPersonaById } from "@/lib/api/persona.request";
 import ChatBoxComponent from "@/components/persona/ChatBoxComponent";
+import { getConversationsByPersonaId } from "@/lib/api/conversation.request";
 
 interface PersonaDetailPageProps {
   params: {
@@ -16,7 +17,7 @@ export default async function PersonaDetailPage({
 }: PersonaDetailPageProps) {
   const data = await params;
   const persona = await getPersonaById(Number(data.id));
-  //const conversations = await getConversationsByPersonaId(Number(data.id));
+  const conversations = await getConversationsByPersonaId(Number(data.id));
 
   if (!persona) {
     return (
@@ -41,7 +42,7 @@ export default async function PersonaDetailPage({
             Persona {persona.name} Chat
           </h1>
           <div>
-            <ChatBoxComponent persona={persona} />
+            <ChatBoxComponent persona={persona} conversations={conversations} />
           </div>
         </div>
       </div>
