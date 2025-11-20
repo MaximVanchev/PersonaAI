@@ -55,7 +55,7 @@ model Message {
   id              Int          @id @default(autoincrement())
   conversationId  Int
   conversation    Conversation @relation(fields: [conversationId], references: [id])
-  sender          MessageType
+  role          MessageRole
   content         String
   createdAt       DateTime     @default(now())
 
@@ -63,9 +63,10 @@ model Message {
   @@index([createdAt])
 }
 
-enum MessageType {
-  USER
-  BOT
+enum MessageRole {
+  system
+  user
+  assistant
 }
 
 model File {
