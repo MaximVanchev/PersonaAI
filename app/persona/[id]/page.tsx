@@ -30,15 +30,6 @@ export default async function PersonaPage({ params }: PersonaDetailPageProps) {
       <div className="max-w-6xl mx-auto">
         {/* Header with back button */}
         <div className="mb-8">
-          <Link href="/">
-            <Button
-              variant="outline"
-              className="mb-4 border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Personas
-            </Button>
-          </Link>
           <div>
             <ChatBoxComponent
               persona={persona}

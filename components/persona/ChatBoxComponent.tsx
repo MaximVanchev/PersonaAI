@@ -14,8 +14,8 @@ import {
 import { getMessagesByConversationId } from "@/lib/api/message.request";
 import { sendChatMessage } from "@/lib/api/chat.request";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ConversationSidebar } from "@/components/persona/ConversationSidebar";
+import { ChatUIComponent } from "@/components/persona/ChatUIComponent";
 
 interface ChatBoxComponentProps {
   persona: PersonaChatDto;
@@ -126,21 +126,34 @@ export default function ChatBoxComponent({
 
   return (
     <div className="flex flex-col md:flex-row gap-4 md:gap-6 mt-4 md:mt-6">
-      {/* Mobile top bar */}
-      <div className="md:hidden flex items-center justify-between bg-gray-900 border border-gray-700 rounded-lg p-3 mb-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setSidebarOpen(true)}
-          aria-label="Open conversations"
-          className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white"
-        >
-          💬 Conversations
-        </Button>
+      {/* Mobile sticky header */}
+      <div className="md:hidden sticky top-0 z-30 bg-gray-900 border border-gray-700 rounded-lg p-3 mb-4 shadow-lg">
+        <div className="flex items-center justify-between gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.history.back()}
+            aria-label="Back to personas"
+            className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white flex items-center gap-1"
+          >
+            ← Personas
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open conversations"
+            className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white flex items-center gap-1"
+          >
+            💬 Chats
+          </Button>
+        </div>
         {selectedConversationId && (
-          <span className="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">
-            #{selectedConversationId}
-          </span>
+          <div className="text-center mt-2">
+            <span className="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">
+              Conversation #{selectedConversationId}
+            </span>
+          </div>
         )}
       </div>
 
@@ -172,93 +185,16 @@ export default function ChatBoxComponent({
         creating={creatingConversation}
       />
 
-      <div className="flex-1 flex flex-col bg-gray-900 border border-gray-700 rounded-lg shadow-2xl p-4 min-h-[60vh]">
-        <div className="border-b border-gray-700 pb-3 mb-4 flex items-center justify-between">
-          <div>
-            <h3 className="text-xl font-semibold text-gray-100">
-              {persona.name}
-            </h3>
-            <p className="text-xs text-gray-400">
-              {persona.role} • {persona.tone || "Neutral"}
-            </p>
-          </div>
-          {selectedConversationId && (
-            <span className="text-xs text-gray-500">
-              #{selectedConversationId}
-            </span>
-          )}
-        </div>
-
-        <div className="flex-1 overflow-y-auto space-y-4 mb-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-          {loadingMessages && (
-            <div className="text-sm text-gray-400 animate-pulse flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
-              Loading messages...
-            </div>
-          )}
-          {!loadingMessages && messages.length === 0 && (
-            <div className="text-sm text-gray-400 text-center py-8">
-              {selectedConversationId
-                ? "No messages yet. Start the conversation below! 💬"
-                : "Select or create a conversation to begin chatting."}
-            </div>
-          )}
-          {messages.map((m) => (
-            <div
-              key={m.id}
-              className={`max-w-[85%] md:max-w-[75%] rounded-lg px-4 py-3 text-sm shadow-lg ${
-                m.role === "user"
-                  ? "bg-gradient-to-br from-indigo-600 to-indigo-700 text-white self-end ml-auto"
-                  : m.role === "assistant"
-                    ? "bg-gradient-to-br from-gray-700 to-gray-800 text-gray-100 border border-gray-600"
-                    : "bg-gradient-to-br from-yellow-600 to-yellow-700 text-yellow-50"
-              }`}
-            >
-              <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
-              <div className="text-[10px] mt-2 opacity-70 text-right">
-                {new Date(m.createdAt).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSendMessage();
-          }}
-          className="flex gap-3 pt-4 border-t border-gray-700"
-        >
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={
-              selectedConversationId
-                ? "Type your message..."
-                : "Create/select a conversation first"
-            }
-            disabled={sending || !selectedConversationId}
-            className="flex-1 text-sm md:text-base bg-gray-800 border-gray-600 text-gray-100 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
-          />
-          <Button
-            type="submit"
-            disabled={sending || !selectedConversationId || !input.trim()}
-            className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-700 disabled:text-gray-400 px-6"
-          >
-            {sending ? (
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
-                Sending
-              </div>
-            ) : (
-              "Send"
-            )}
-          </Button>
-        </form>
-      </div>
+      <ChatUIComponent
+        persona={persona}
+        selectedConversationId={selectedConversationId}
+        messages={messages}
+        input={input}
+        setInput={setInput}
+        loadingMessages={loadingMessages}
+        sending={sending}
+        onSendMessage={handleSendMessage}
+      />
     </div>
   );
 }

@@ -2,6 +2,8 @@
 
 import { ConversationDto } from "@/types/index.type";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 interface ConversationSidebarProps {
   conversations: ConversationDto[];
@@ -31,6 +33,15 @@ export function ConversationSidebar({
     : "w-64 flex-shrink-0 bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-4 flex flex-col";
   return (
     <div className={containerClasses} aria-hidden={!open && mobile}>
+      <Link href="/">
+        <Button
+          variant="outline"
+          className="mb-4 border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Personas
+        </Button>
+      </Link>
       {mobile && (
         <div className="flex items-center justify-end mb-2">
           <button
@@ -76,7 +87,7 @@ export function ConversationSidebar({
                 e.stopPropagation();
                 onDelete(c.id);
               }}
-              className="text-gray-500 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity rounded p-1 hover:bg-gray-700"
+              className="text-red-500 text-md transition-opacity rounded p-1 "
               aria-label="Delete conversation"
             >
               ✕
