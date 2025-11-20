@@ -1,8 +1,9 @@
 export interface MessageDto {
   id: number;
   conversationId: number;
-  sender: "user" | "persona";
-  message: string;
+  role: "system" | "user" | "assistant";
+  content: string;
   createdAt: Date;
-  updatedAt: Date;
 }
+
+// NOTE: Prisma Message model does not have updatedAt; removing from DTO for consistency

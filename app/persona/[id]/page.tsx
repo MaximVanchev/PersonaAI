@@ -26,21 +26,24 @@ export default async function PersonaPage({ params }: PersonaDetailPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-slate-800 p-4">
+      <div className="max-w-6xl mx-auto">
         {/* Header with back button */}
         <div className="mb-8">
           <Link href="/">
-            <Button variant="outline" className="mb-4">
+            <Button
+              variant="outline"
+              className="mb-4 border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Personas
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Persona {persona.name} Chat
-          </h1>
           <div>
-            <ChatBoxComponent persona={persona} conversations={conversations} />
+            <ChatBoxComponent
+              persona={persona}
+              initialConversations={conversations}
+            />
           </div>
         </div>
       </div>
