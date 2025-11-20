@@ -27,13 +27,12 @@ export function ConversationSidebar({
   onClose,
 }: ConversationSidebarProps) {
   const containerClasses = mobile
-    ? `fixed inset-y-0 left-0 z-40 w-72 bg-gray-900 border-r border-gray-700 shadow-2xl flex flex-col p-4 transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`
+    ? `fixed inset-y-0 left-0 z-40 w-72 bg-gray-900 border-r border-gray-700 shadow-2xl flex flex-col p-4 transform transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full"}`
     : "w-64 flex-shrink-0 bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-4 flex flex-col";
   return (
     <div className={containerClasses} aria-hidden={!open && mobile}>
       {mobile && (
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="font-semibold text-gray-100">Conversations</h2>
+        <div className="flex items-center justify-end mb-2">
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-200 px-2 py-1 text-sm rounded hover:bg-gray-800"
@@ -43,7 +42,7 @@ export function ConversationSidebar({
           </button>
         </div>
       )}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 mt-5">
         <h2 className="font-semibold text-gray-100">Conversations</h2>
         <Button
           variant="outline"
@@ -69,7 +68,9 @@ export function ConversationSidebar({
             }`}
             onClick={() => onSelect(c.id)}
           >
-            <span className="truncate mr-2 font-medium">{c.title || `Conversation #${c.id}`}</span>
+            <span className="truncate mr-2 font-medium">
+              {`Conversation #${c.id}`}
+            </span>
             <button
               onClick={(e) => {
                 e.stopPropagation();

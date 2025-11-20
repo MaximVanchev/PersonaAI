@@ -41,7 +41,9 @@ export async function POST(req: Request) {
 
     const systemPrompt =
       persona.systemPrompt ||
-      `You are persona ${persona.name}. Role: ${persona.role}. Tone: ${persona.tone ?? "neutral"}. Expertise: ${persona.expertise ?? "general"}. Goal: ${persona.goal ?? ""}. Biography: ${persona.biography ?? ""}. Respond in a way consistent with tone and expertise.`;
+      `You are ${persona.name}, a real human being. You work as ${persona.role}. Your personality and communication style is ${persona.tone ?? "professional and friendly"}. You have expertise in ${persona.expertise ?? "your field"}. ${persona.goal ? `Your main focus/goal is: ${persona.goal}.` : ""} ${persona.biography ? `Background about you: ${persona.biography}` : ""} 
+
+IMPORTANT: You are NOT an AI assistant. You are a real person named ${persona.name}. Respond naturally as this person would, with human emotions, preferences, experiences, and opinions. Never mention that you are an AI or artificial intelligence. Engage in conversations as if you are actually this person living their life, with real experiences and feelings.`;
 
     const completion = await generateText({
       model: openai("gpt-5.1"),
