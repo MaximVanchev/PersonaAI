@@ -16,6 +16,7 @@ import { sendChatMessage } from "@/lib/api/chat.request";
 import { Button } from "@/components/ui/button";
 import { ConversationSidebar } from "@/components/persona/ConversationSidebar";
 import { ChatUIComponent } from "@/components/persona/ChatUIComponent";
+import { toast } from "react-hot-toast";
 
 interface ChatBoxComponentProps {
   persona: PersonaChatDto;
@@ -46,6 +47,7 @@ export default function ChatBoxComponent({
       setMessages(data || []);
     } catch (e) {
       console.error(e);
+      toast.error("Failed to load messages");
     } finally {
       setLoadingMessages(false);
     }
@@ -72,9 +74,11 @@ export default function ChatBoxComponent({
         setConversations((prev) => [conv, ...prev]);
         setSelectedConversationId(conv.id);
         setMessages([]);
+        toast.success("Conversation created");
       }
     } catch (e) {
       console.error(e);
+      toast.error("Failed to create conversation");
     } finally {
       setCreatingConversation(false);
     }
@@ -90,8 +94,10 @@ export default function ChatBoxComponent({
         setMessages([]);
         if (next) loadMessages();
       }
+      toast.success("Conversation deleted");
     } catch (e) {
       console.error(e);
+      toast.error("Failed to delete conversation");
     }
   }
 
@@ -117,6 +123,7 @@ export default function ChatBoxComponent({
       }
     } catch (e) {
       console.error(e);
+      toast.error("Failed to send message");
     } finally {
       setSending(false);
     }
