@@ -59,3 +59,21 @@ export async function getPersonaById(
 
   return data as PersonaChatDto;
 }
+
+export async function deletePersonaById(
+  id: number
+): Promise<PersonaChatDto | null> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
+  const res = await fetch(`/api/persona/${id}`, {
+    method: "DELETE",
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to delete persona by ID");
+  }
+
+  return data as PersonaChatDto;
+}

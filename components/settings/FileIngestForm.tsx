@@ -43,17 +43,6 @@ export default function FileIngestForm() {
           className="block w-full text-sm text-gray-100 bg-gray-700 rounded-lg border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 p-2 file:bg-gray-600 file:border-0 file:text-gray-200 file:rounded file:px-3 file:py-1 file:mr-3"
         />
       </div>
-      <div className="flex flex-col gap-2">
-        <label htmlFor="name" className="font-medium text-gray-200">
-          Name (optional)
-        </label>
-        <input
-          id="name"
-          name="name"
-          placeholder="Optional name override"
-          className="block w-full text-sm text-gray-100 bg-gray-700 rounded-lg border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 p-2 placeholder:text-gray-400"
-        />
-      </div>
       <button
         disabled={busy}
         type="submit"

@@ -152,7 +152,7 @@ export default function ChatBoxComponent({
             aria-label="Open conversations"
             className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white flex items-center gap-1"
           >
-            💬 Chats
+            💬 Conversations
           </Button>
         </div>
         {selectedConversationId && (

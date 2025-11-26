@@ -13,7 +13,7 @@ import {
 } from "@/types/shared/persona.type";
 import { useRouter } from "next/navigation";
 
-export function GenerateForm() {
+export function GenerateForm(params: { personaCount: number }) {
   const [maleCount, setMaleCount] = useState(1);
   const [femaleCount, setFemaleCount] = useState(1);
   const [busy, setBusy] = useState(false);
@@ -22,6 +22,12 @@ export function GenerateForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
+
+    if (maleCount + femaleCount + params.personaCount > 6) {
+      toster.error("You can generate a maximum of 6 personas");
+      setBusy(false);
+      return;
+    }
 
     try {
       await generatePersonasRequest({
@@ -41,8 +47,8 @@ export function GenerateForm() {
   };
 
   return (
-    <div>
-      <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left text-gray-300">
+    <div className="w-full max-w-lg mx-auto">
+      <ol className="font-mono list-inside list-decimal text-sm/6 text-center text-gray-300 mb-6">
         <li className="mb-2 tracking-[-.01em]">Generate your AI personas.</li>
         <li className="tracking-[-.01em]">
           Start a chat with your AI personas and explore their unique

@@ -32,12 +32,9 @@ export default async function Home() {
         </div>
       </header>
       <main className="flex-1 flex items-center justify-center p-8 sm:p-20">
-        <div className="flex flex-col gap-[40px] items-center sm:items-start">
-          {personaList.length > 0 ? (
-            <PersonaListComponent personas={personaList} />
-          ) : (
-            <GenerateForm />
-          )}
+        <div className="flex flex-col gap-8 sm:gap-12 items-center max-w-4xl mx-auto">
+          <GenerateForm personaCount={personaList.length} />
+          <PersonaListComponent personas={personaList} />
         </div>
       </main>
       <footer className="flex gap-[24px] p-8 sm:p-20 items-center justify-center"></footer>
