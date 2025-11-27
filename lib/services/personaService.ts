@@ -33,10 +33,10 @@ Each PersonaDto must contain the following properties with the exact meanings de
 - role: The persona’s primary job title, profession, or societal role.
 - age: A realistic number between 18–65 that aligns logically with their experience, profession, and biography based on the data.
 - gender: Either "male" or "female", as requested.
-- tone: The communication style and personality tone of the persona (e.g., "приятелски и открит", "професионален и директен", "спокоен и аналитичен", "емоционален и вдъхновяващ").
+- tone: The communication style and personality tone of the persona (e.g., "friendly and open", "professional and direct", "calm and analytical", "emotional and inspiring").
 - expertise: The persona’s core skill areas, knowledge, and practical strengths ).
 - biography: A detailed 2–3 sentence background story describing the persona’s personal history, career path, interests, and motivations. The biography must feel human, coherent.
-- goal: The persona’s primary motivation or objective in life or work (e.g., "да развие успешен собствен бизнес", "да изгради стабилна кариера", "да постигне баланс между работа и личен живот").
+- goal: The persona’s primary motivation or objective in life or work (e.g., "to develop a successful own business", "to build a stable career", "to achieve a work-life balance").
  
 REQUIREMENTS:
  
@@ -48,7 +48,7 @@ REQUIREMENTS:
         },
         {
           role: "user",
-          content: `Generate a total of ${params.maleCount + params.femaleCount} unique personas. ${params.maleCount} should be male and ${params.femaleCount} should be female. Use the following files as the only source of information for the personas you create: ${params.files.map((f) => f.fileName).join(", ")}. `,
+          content: `Generate a total of ${params.maleCount + params.femaleCount} unique personas with properties in English. ${params.maleCount} should be male and ${params.femaleCount} should be female. Use the following files as the only source of information for the personas you create: ${params.files.map((f) => f.fileName).join(", ")}. `,
         },
       ],
     });

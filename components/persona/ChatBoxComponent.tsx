@@ -71,6 +71,11 @@ export default function ChatBoxComponent({
     try {
       const conv = await createConversation(persona.id, "New Conversation");
       if (conv) {
+        const newMsgs = await sendChatMessage(persona.id, conv.id, "Hello!");
+        if (newMsgs) {
+          setMessages((prev) => [...prev, ...newMsgs.filter((m) => m != null)]);
+          setInput("");
+        }
         setConversations((prev) => [conv, ...prev]);
         setSelectedConversationId(conv.id);
         setMessages([]);
