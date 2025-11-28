@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   ConversationDto,
   MessageDto,
@@ -16,6 +16,7 @@ import { sendChatMessage } from "@/lib/api/chat.request";
 import { Button } from "@/components/ui/button";
 import { ConversationSidebar } from "@/components/persona/ConversationSidebar";
 import { ChatUIComponent } from "@/components/persona/ChatUIComponent";
+import { MobileHeader } from "@/components/persona/MobileHeader";
 import { toast } from "react-hot-toast";
 
 interface ChatBoxComponentProps {
@@ -38,6 +39,12 @@ export default function ChatBoxComponent({
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [creatingConversation, setCreatingConversation] = useState(false);
   const [sending, setSending] = useState(false);
+  const [showMessages, setShowMessages] = useState(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const loadMessages = useCallback(async () => {
     if (!selectedConversationId) return;
@@ -56,6 +63,10 @@ export default function ChatBoxComponent({
   useEffect(() => {
     loadMessages();
   }, [loadMessages]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const refreshConversations = useCallback(async () => {
     try {
@@ -139,35 +150,12 @@ export default function ChatBoxComponent({
   return (
     <div className="flex flex-col md:flex-row gap-4 md:gap-6 mt-4 md:mt-6">
       {/* Mobile sticky header */}
-      <div className="md:hidden sticky top-0 z-30 bg-gray-900 border border-gray-700 rounded-lg p-3 mb-4 shadow-lg">
-        <div className="flex items-center justify-between gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.history.back()}
-            aria-label="Back to personas"
-            className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white flex items-center gap-1"
-          >
-            ← Personas
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Open conversations"
-            className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white flex items-center gap-1"
-          >
-            💬 Conversations
-          </Button>
-        </div>
-        {selectedConversationId && (
-          <div className="text-center mt-2">
-            <span className="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">
-              Conversation #{selectedConversationId}
-            </span>
-          </div>
-        )}
-      </div>
+      <MobileHeader
+        selectedConversationId={selectedConversationId}
+        showMessages={showMessages}
+        setShowMessages={setShowMessages}
+        onOpenSidebar={() => setSidebarOpen(true)}
+      />
 
       {/* Desktop sidebar */}
       <div className="hidden md:block">
@@ -178,6 +166,8 @@ export default function ChatBoxComponent({
           onCreate={handleCreateConversation}
           onDelete={handleDeleteConversation}
           creating={creatingConversation}
+          setShowMessages={setShowMessages}
+          showMessages={showMessages}
         />
       </div>
 
@@ -206,6 +196,9 @@ export default function ChatBoxComponent({
         loadingMessages={loadingMessages}
         sending={sending}
         onSendMessage={handleSendMessage}
+        showMessages={showMessages}
+        setShowMessages={setShowMessages}
+        messagesEndRef={messagesEndRef}
       />
     </div>
   );

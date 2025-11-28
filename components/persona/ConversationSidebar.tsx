@@ -15,6 +15,8 @@ interface ConversationSidebarProps {
   mobile?: boolean; // render as drawer-style overlay on mobile
   open?: boolean; // mobile open state
   onClose?: () => void; // mobile close handler
+  setShowMessages?: (show: boolean) => void;
+  showMessages?: boolean;
 }
 
 export function ConversationSidebar({
@@ -27,10 +29,12 @@ export function ConversationSidebar({
   mobile = false,
   open = true,
   onClose,
+  setShowMessages,
+  showMessages,
 }: ConversationSidebarProps) {
   const containerClasses = mobile
     ? `fixed inset-y-0 left-0 z-40 w-72 bg-gray-900 border-r border-gray-700 shadow-2xl flex flex-col p-4 transform transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full"}`
-    : "w-64 flex-shrink-0 bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-4 flex flex-col";
+    : "w-64 flex-shrink-0 bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-4 flex flex-col sticky top-10 self-start";
   return (
     <div className={containerClasses} aria-hidden={!open && mobile}>
       <Link href="/">
@@ -51,6 +55,25 @@ export function ConversationSidebar({
           >
             ✕
           </button>
+        </div>
+      )}
+      {/* Toggle Switch */}
+      {setShowMessages && showMessages !== undefined && (
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-400">Messages</span>
+          <button
+            onClick={() => setShowMessages(!showMessages)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              showMessages ? "bg-gray-600" : "bg-indigo-600"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                showMessages ? "translate-x-1" : "translate-x-6"
+              }`}
+            />
+          </button>
+          <span className="text-xs text-gray-400">Video Avatar</span>
         </div>
       )}
       <div className="flex items-center justify-between mb-4 mt-5">

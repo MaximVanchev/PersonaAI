@@ -3,7 +3,8 @@
 import { MessageDto, PersonaChatDto } from "@/types/index.type";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { HeyGenComponent } from "./HeyGenComponent";
+import { RefObject } from "react";
 
 interface ChatUIComponentProps {
   persona: PersonaChatDto;
@@ -14,6 +15,9 @@ interface ChatUIComponentProps {
   loadingMessages: boolean;
   sending: boolean;
   onSendMessage: () => void;
+  showMessages: boolean;
+  setShowMessages: (value: boolean) => void;
+  messagesEndRef: RefObject<HTMLDivElement | null>;
 }
 
 export function ChatUIComponent({
@@ -25,10 +29,11 @@ export function ChatUIComponent({
   loadingMessages,
   sending,
   onSendMessage,
+  showMessages,
+  messagesEndRef,
 }: ChatUIComponentProps) {
-  const [showMessages, setShowMessages] = useState(true);
   return (
-    <div className="flex-1 flex flex-col bg-gray-900 border border-gray-700 p-5 rounded-lg shadow-2xl overflow-hidden">
+    <div className="flex-1 flex flex-col bg-gray-900 border border-gray-700 p-5 rounded-lg shadow-2xl overflow-hidden mt-25 md:mt-0">
       {/* Desktop header */}
       <div className="hidden md:flex border-b border-gray-700 pb-3 mb-4 mx-4 mt-4 items-center justify-between">
         <div>
@@ -40,23 +45,6 @@ export function ChatUIComponent({
           </p>
         </div>
         <div className="flex items-center gap-4">
-          {/* Toggle Switch */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400">Messages</span>
-            <button
-              onClick={() => setShowMessages(!showMessages)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                showMessages ? "bg-gray-600" : "bg-indigo-600"
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  showMessages ? "translate-x-1" : "translate-x-6"
-                }`}
-              />
-            </button>
-            <span className="text-xs text-gray-400">Video Avatar</span>
-          </div>
           {selectedConversationId && (
             <span className="text-xs text-gray-500">
               #{selectedConversationId}
@@ -124,24 +112,17 @@ export function ChatUIComponent({
                 </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </>
         ) : (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center p-8">
-              <div className="text-6xl mb-4">🎭</div>
-              <h3 className="text-2xl font-bold text-gray-100 mb-2">
-                Heygen Mode
-              </h3>
-              <p className="text-gray-400 text-sm">
-                Heygen integration will be displayed here
-              </p>
-              <div className="mt-6 p-4 bg-gray-800 rounded-lg border border-gray-600">
-                <p className="text-gray-300 text-sm">
-                  Video avatar feature coming soon...
-                </p>
-              </div>
-            </div>
-          </div>
+          <HeyGenComponent
+            persona={persona}
+            selectedConversationId={selectedConversationId}
+            input={input}
+            setInput={setInput}
+            onSendMessage={onSendMessage}
+            sending={sending}
+          />
         )}
       </div>
 
