@@ -49,14 +49,7 @@ export async function POST(req: Request) {
     let content_final = content;
 
     if (messagesCount === 0) {
-      content_final = `When the conversation begins, you MUST send a greeting message **before the user speaks**, written fully in character.  
-This message should include:
- 
-1. A friendly greeting  
-2. A short self-introduction (name + role + who you are)  
-3. Key elements of your buyer persona identity  
-4. Short explanation of what motivates you, how do you communicate
-5. Invitation for the user to ask you anything`;
+      content_final = `At the start of the conversation, send one short greeting message in character. Include: a hello, your name and role, 1–2 key traits, what motivates you, and invite the user to ask anything.`;
     }
 
     const systemPrompt =

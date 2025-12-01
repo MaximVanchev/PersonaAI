@@ -115,14 +115,7 @@ export function ChatUIComponent({
             <div ref={messagesEndRef} />
           </>
         ) : (
-          <HeyGenComponent
-            persona={persona}
-            selectedConversationId={selectedConversationId}
-            input={input}
-            setInput={setInput}
-            onSendMessage={onSendMessage}
-            sending={sending}
-          />
+          <HeyGenComponent messages={messages} />
         )}
       </div>
 

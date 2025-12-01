@@ -2,20 +2,10 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Mic, MicOff, Video, VideoOff, Volume2, VolumeX } from "lucide-react";
 
 interface HeyGenComponentProps {
-  persona: {
-    name: string;
-    role: string;
-    tone?: string;
-  };
-  selectedConversationId: number | null;
-  input: string;
-  setInput: (value: string) => void;
-  onSendMessage: () => void;
-  sending: boolean;
+  messages: any[];
 }
 
 interface StreamingAvatarApi {
@@ -30,14 +20,7 @@ declare global {
   }
 }
 
-export function HeyGenComponent({
-  persona,
-  selectedConversationId,
-  input,
-  setInput,
-  onSendMessage,
-  sending,
-}: HeyGenComponentProps) {
+export function HeyGenComponent({ messages }: HeyGenComponentProps) {
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -45,33 +28,65 @@ export function HeyGenComponent({
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
   const [isMicEnabled, setIsMicEnabled] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sdkReady, setSdkReady] = useState(false);
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const avatarApiRef = useRef<StreamingAvatarApi | null>(null);
 
   // HeyGen configuration
   const heygenConfig = {
-    apiKey: process.env.NEXT_PUBLIC_HEYGEN_API_KEY || "your-heygen-api-key",
+    apiKey: process.env.NEXT_PUBLIC_HEYGEN_API_KEY!,
     serverUrl:
       process.env.NEXT_PUBLIC_HEYGEN_SERVER_URL || "wss://api.heygen.com",
-    avatarId: "default-avatar-id", // You can make this configurable per persona
+    avatarId:
+      process.env.NEXT_PUBLIC_HEYGEN_FEMALE_AVATAR ||
+      process.env.NEXT_PUBLIC_HEYGEN_MALE_AVATAR!,
     quality: "high",
     language: "en",
   };
 
-  // Initialize HeyGen SDK
+  // Initialize HeyGen SDK with retries/fallback URLs
   useEffect(() => {
     const loadHeyGenSDK = async () => {
       try {
-        // Load HeyGen SDK script if not already loaded
-        if (!window.StreamingAvatarApi) {
-          const script = document.createElement("script");
-          script.src = "https://sdk.heygen.com/streaming-avatar.js";
-          script.async = true;
-          script.onload = () => {
-            console.log("HeyGen SDK loaded successfully");
-          };
-          document.head.appendChild(script);
+        if (window.StreamingAvatarApi) {
+          setSdkReady(true);
+          return;
+        }
+
+        const candidateUrls = [
+          "https://resource.heygen.ai/streaming-avatar/streaming_avatar.js",
+          // Fallback CDN candidates
+          "https://cdn.heygen.com/streaming-avatar/streaming_avatar.js",
+          "https://static.heygen.com/streaming-avatar/streaming_avatar.js",
+        ];
+
+        let loaded = false;
+        for (const url of candidateUrls) {
+          await new Promise<void>((resolve) => {
+            const script = document.createElement("script");
+            script.src = url;
+            script.async = true;
+            script.onload = () => {
+              console.log("HeyGen SDK loaded successfully from:", url);
+              loaded = true;
+              setSdkReady(true);
+              resolve();
+            };
+            script.onerror = () => {
+              console.warn("Failed to load HeyGen SDK from:", url);
+              resolve();
+            };
+            document.head.appendChild(script);
+          });
+          if (loaded) break;
+        }
+
+        if (!loaded) {
+          setError(
+            "Unable to load HeyGen SDK. Check network/DNS and allowlist the SDK URL."
+          );
         }
       } catch (err) {
         console.error("Failed to load HeyGen SDK:", err);
@@ -82,10 +97,44 @@ export function HeyGenComponent({
     loadHeyGenSDK();
   }, []);
 
+  // Fetch server-side session token per HeyGen Quick Start
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const resp = await fetch("/api/heygen/session");
+        const json = await resp.json();
+        if (resp.ok) {
+          // Common patterns: json.token or json.data.token
+          const token =
+            json.token ||
+            json.data?.token ||
+            json.session_token ||
+            json.access_token;
+          if (!token) {
+            console.warn(
+              "HeyGen session response did not include token:",
+              json
+            );
+          }
+          setSessionToken(token || null);
+        } else {
+          setError(json.error || "Failed to create HeyGen session");
+        }
+      } catch (e: any) {
+        setError(e?.message || "Failed to call HeyGen session endpoint");
+      }
+    };
+    fetchSession();
+  }, []);
+
   // Start avatar session
   const startAvatar = useCallback(async () => {
     if (!window.StreamingAvatarApi) {
       setError("HeyGen SDK not loaded");
+      return;
+    }
+    if (!sessionToken) {
+      setError("HeyGen session token not available");
       return;
     }
 
@@ -93,16 +142,17 @@ export function HeyGenComponent({
     setError(null);
 
     try {
+      // Per Quick Start, constructor typically accepts token / signaling config
       avatarApiRef.current = new window.StreamingAvatarApi({
-        token: heygenConfig.apiKey,
+        token: sessionToken,
         serverUrl: heygenConfig.serverUrl,
       });
 
       await avatarApiRef.current.createStartAvatar({
-        avatarName: heygenConfig.avatarId,
+        avatar_id: heygenConfig.avatarId,
         quality: heygenConfig.quality,
         language: heygenConfig.language,
-        videoElement: videoRef.current,
+        video_element: videoRef.current,
       });
 
       setIsConnected(true);
@@ -152,12 +202,33 @@ export function HeyGenComponent({
     [isConnected]
   );
 
-  // Handle message sending with avatar speech
-  const handleSendMessage = useCallback(() => {
-    onSendMessage();
-    // You can integrate this with your chat system to make the avatar speak responses
-    // For example: speakText(responseText);
-  }, [onSendMessage]);
+  // Auto-start avatar after SDK and session are ready
+  useEffect(() => {
+    if (sdkReady && sessionToken && !isConnected && !isLoading) {
+      startAvatar();
+    }
+  }, [sdkReady, sessionToken, isConnected, isLoading, startAvatar]);
+
+  // Log when video element receives a stream (if SDK attaches MediaStream)
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const handler = () => {
+      console.log("Video element readyState:", video.readyState);
+    };
+    video.addEventListener("loadeddata", handler);
+    return () => video.removeEventListener("loadeddata", handler);
+  }, []);
+
+  // Auto-speak last message when messages change or when avatar connects
+  useEffect(() => {
+    if (!isConnected || !messages.length || isSpeaking) return;
+
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.content) {
+      speakText(lastMessage.content);
+    }
+  }, [messages, isConnected, isSpeaking, speakText]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -177,18 +248,11 @@ export function HeyGenComponent({
             <div className="text-center">
               <div className="text-6xl mb-4">🤖</div>
               <h3 className="text-xl font-semibold text-white mb-2">
-                {persona.name} Avatar
+                AI Avatar
               </h3>
-              <p className="text-gray-400 text-sm mb-4">
-                Start video chat with your AI persona
+              <p className="text-gray-400 text-sm">
+                Avatar will start automatically...
               </p>
-              <Button
-                onClick={startAvatar}
-                disabled={isLoading}
-                className="bg-indigo-600 hover:bg-indigo-700"
-              >
-                {isLoading ? "Connecting..." : "Start Video Chat"}
-              </Button>
             </div>
           </div>
         )}
@@ -278,38 +342,6 @@ export function HeyGenComponent({
           </div>
         )}
       </div>
-
-      {/* Chat Input */}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSendMessage();
-        }}
-        className="flex gap-3 pt-4 border-t border-gray-700"
-      >
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={
-            isConnected
-              ? "Type your message to the avatar..."
-              : selectedConversationId
-                ? "Connect avatar first to start video chat"
-                : "Create/select a conversation first"
-          }
-          disabled={sending || !selectedConversationId || !isConnected}
-          className="flex-1 text-sm md:text-base bg-gray-800 border-gray-600 text-gray-100 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
-        />
-        <Button
-          type="submit"
-          disabled={
-            sending || !selectedConversationId || !input.trim() || !isConnected
-          }
-          className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-700 disabled:text-gray-400 px-6"
-        >
-          {sending ? "Sending..." : "Send"}
-        </Button>
-      </form>
 
       {/* Avatar Status */}
       <div className="mt-2 text-xs text-center">
