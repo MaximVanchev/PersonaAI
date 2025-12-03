@@ -3,7 +3,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Volume2, VolumeX, RotateCcw } from "lucide-react";
-import StreamingAvatar, { StartAvatarRequest } from "@heygen/streaming-avatar";
+import StreamingAvatar, {
+  StartAvatarRequest,
+  TaskType,
+} from "@heygen/streaming-avatar";
 
 interface HeyGenComponentProps {
   messages: any[];
@@ -28,6 +31,7 @@ export function HeyGenComponent({
   const videoRef = useRef<HTMLVideoElement>(null);
   const avatarApiRef = useRef<StreamingAvatar | null>(null);
   const lastSpokenMessageRef = useRef<string | null>(null);
+  const connectionCheckRef = useRef<NodeJS.Timeout | null>(null);
 
   // HeyGen configuration
   const heygenConfig = {
@@ -87,15 +91,50 @@ export function HeyGenComponent({
         console.log("Avatar stream ready");
       });
 
+      // Catch DataChannel errors
+      avatarApiRef.current.on("error", (error: any) => {
+        console.log("Avatar error caught:", error);
+        if (
+          error &&
+          (error.message?.includes("DataChannel") ||
+            error.type?.includes("DataChannel"))
+        ) {
+          console.log("DataChannel error detected, handling gracefully");
+          setError("Connection lost due to inactivity");
+          setIsConnected(false);
+          if (onSwitchToChat) {
+            onSwitchToChat();
+          }
+        }
+      });
+
+      // Catch connection state changes (only handle critical failures)
+      avatarApiRef.current.on("connection_state_changed", (state: any) => {
+        console.log("Avatar connection state changed:", state);
+        // Only disconnect on actual failures, not normal idle states
+        if (state === "failed") {
+          console.log("Connection state indicates failure, switching to chat");
+          setIsConnected(false);
+          if (onSwitchToChat) {
+            onSwitchToChat();
+          }
+        }
+      });
+
       const startRequest: StartAvatarRequest = {
         avatarName: heygenConfig.avatarId,
         quality: heygenConfig.quality as any,
         language: heygenConfig.language,
         disableIdleTimeout: true,
-        useSilencePrompt: true,
+        useSilencePrompt: false, // Allow silence without prompting
         // Disable knowledge base and conversational AI
         knowledgeId: undefined,
         knowledgeBase: undefined,
+        // Additional settings to prevent disconnection
+        voice: {
+          rate: 1.0,
+          emotion: "neutral",
+        },
       };
 
       console.log("Starting avatar with request:", startRequest);
@@ -127,6 +166,32 @@ export function HeyGenComponent({
 
       setIsConnected(true);
       console.log("Avatar started successfully", response);
+
+      // Start connection health check (reduced frequency to avoid interference)
+      connectionCheckRef.current = setInterval(() => {
+        if (avatarApiRef.current && isConnected) {
+          try {
+            // Only check for critical connection failures, not inactivity
+            const connectionState = avatarApiRef.current.connectionState;
+            if (connectionState === "failed") {
+              console.log(
+                "Connection health check failed, state:",
+                connectionState
+              );
+              setIsConnected(false);
+              if (onSwitchToChat) {
+                onSwitchToChat();
+              }
+              if (connectionCheckRef.current) {
+                clearInterval(connectionCheckRef.current);
+              }
+            }
+          } catch (error) {
+            console.log("Connection health check error:", error);
+            // Don't automatically disconnect on health check errors
+          }
+        }
+      }, 30000); // Check every 30 seconds (less frequent)
     } catch (err: any) {
       console.error("Failed to start avatar:", err);
       console.error("Error details:", err.message, err.status, err.body);
@@ -143,6 +208,12 @@ export function HeyGenComponent({
     if (!avatarApiRef.current) return;
 
     try {
+      // Clear connection check interval
+      if (connectionCheckRef.current) {
+        clearInterval(connectionCheckRef.current);
+        connectionCheckRef.current = null;
+      }
+
       await avatarApiRef.current.stopAvatar();
       avatarApiRef.current = null;
       setIsConnected(false);
@@ -164,7 +235,7 @@ export function HeyGenComponent({
       try {
         await avatarApiRef.current.speak({
           text,
-          taskType: "repeat", // Force repeat mode to avoid AI generation
+          taskType: TaskType.REPEAT, // Force repeat mode to avoid AI generation
         });
         console.log("Avatar speaking (repeat mode):", text);
       } catch (err) {
@@ -233,6 +304,9 @@ export function HeyGenComponent({
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      if (connectionCheckRef.current) {
+        clearInterval(connectionCheckRef.current);
+      }
       if (avatarApiRef.current && isConnected) {
         stopAvatar();
       }

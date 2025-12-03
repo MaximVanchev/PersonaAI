@@ -46,14 +46,6 @@ export function ChatUIComponent({
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <Button
-            onClick={() => setShowMessages(!showMessages)}
-            variant="secondary"
-            size="sm"
-            className="bg-gray-700 hover:bg-gray-600 text-gray-100"
-          >
-            {showMessages ? "🎥 Avatar" : "💬 Messages"}
-          </Button>
           {selectedConversationId && (
             <span className="text-xs text-gray-500">
               #{selectedConversationId}
@@ -154,9 +146,16 @@ export function ChatUIComponent({
         <Button
           type="submit"
           disabled={sending || !selectedConversationId || !input.trim()}
-          className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-700 disabled:text-gray-400 px-6"
+          className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-700 disabled:text-gray-400 px-6 flex items-center gap-2"
         >
-          Send
+          {sending ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <span>Sending...</span>
+            </>
+          ) : (
+            "Send"
+          )}
         </Button>
       </form>
     </div>
