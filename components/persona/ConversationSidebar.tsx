@@ -83,9 +83,16 @@ export function ConversationSidebar({
           size="sm"
           onClick={onCreate}
           disabled={creating}
-          className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white"
+          className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white flex items-center gap-1"
         >
-          {creating ? "..." : "+"}
+          {creating ? (
+            <>
+              <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+              <span className="text-xs">Creating...</span>
+            </>
+          ) : (
+            "+"
+          )}
         </Button>
       </div>
       <div className="space-y-2 overflow-y-auto">

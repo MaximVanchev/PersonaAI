@@ -2,27 +2,26 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, Video, VideoOff, Volume2, VolumeX } from "lucide-react";
+import { Volume2, VolumeX, RotateCcw } from "lucide-react";
 import StreamingAvatar, { StartAvatarRequest } from "@heygen/streaming-avatar";
-import toast from "react-hot-toast";
 
 interface HeyGenComponentProps {
   messages: any[];
   gender: string;
   onSwitchToChat?: () => void;
+  selectedConversationId?: number | null;
 }
 
 export function HeyGenComponent({
   messages,
   gender,
   onSwitchToChat,
+  selectedConversationId,
 }: HeyGenComponentProps) {
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
-  const [isMicEnabled, setIsMicEnabled] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
 
@@ -78,7 +77,6 @@ export function HeyGenComponent({
       avatarApiRef.current.on("stream_disconnected", () => {
         console.log("Avatar stream disconnected");
         setIsConnected(false);
-        toast.error("Avatar disconnected unexpectedly");
         // Switch to messages when avatar disconnects
         if (onSwitchToChat) {
           onSwitchToChat();
@@ -219,6 +217,19 @@ export function HeyGenComponent({
     }
   }, [messages, isConnected, isSpeaking]);
 
+  // Disconnect avatar and switch to chat when conversation changes to null (deleted)
+  useEffect(() => {
+    if (selectedConversationId === null && isConnected) {
+      console.log(
+        "Conversation deleted, disconnecting avatar and switching to chat"
+      );
+      stopAvatar();
+      if (onSwitchToChat) {
+        onSwitchToChat();
+      }
+    }
+  }, [selectedConversationId, isConnected, stopAvatar, onSwitchToChat]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -231,7 +242,7 @@ export function HeyGenComponent({
   return (
     <div className="flex flex-col h-full bg-gray-900">
       {/* Video Avatar Container */}
-      <div className="flex-1 relative bg-black rounded-lg overflow-hidden mb-4">
+      <div className="flex-1 relative bg-black rounded-lg overflow-hidden mb-2 md:mb-4">
         {!isConnected && !isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
             <div className="text-center">
@@ -245,10 +256,11 @@ export function HeyGenComponent({
                   : "Avatar will start automatically..."}
               </p>
               {error && (
-                <div className="flex gap-2 justify-center">
+                <div className="flex flex-col sm:flex-row gap-2 justify-center">
                   <Button
                     onClick={startAvatar}
-                    className="bg-indigo-600 hover:bg-indigo-700"
+                    className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto"
+                    size="sm"
                   >
                     Reconnect
                   </Button>
@@ -256,7 +268,8 @@ export function HeyGenComponent({
                     <Button
                       onClick={onSwitchToChat}
                       variant="secondary"
-                      className="bg-gray-600 hover:bg-gray-700"
+                      className="bg-gray-600 hover:bg-gray-700 w-full sm:w-auto"
+                      size="sm"
                     >
                       Switch to Chat
                     </Button>
@@ -278,25 +291,52 @@ export function HeyGenComponent({
 
         <video
           ref={videoRef}
-          className={`w-full h-full object-cover ${!isVideoEnabled ? "hidden" : ""}`}
+          className={`w-full h-full object-cover`}
           autoPlay
           playsInline
           muted={!isAudioEnabled}
         />
 
-        {/* Avatar Mute Button */}
+        {/* Avatar Controls */}
         {isConnected && (
-          <div className="absolute bottom-4 right-4">
+          <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 flex gap-2">
+            {/* Repeat Last Message Button */}
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                const lastMessage = messages[messages.length - 1];
+                if (
+                  lastMessage &&
+                  lastMessage.role === "assistant" &&
+                  lastMessage.content
+                ) {
+                  speakText(lastMessage.content);
+                }
+              }}
+              disabled={
+                !messages.length ||
+                messages[messages.length - 1]?.role !== "assistant" ||
+                isSpeaking
+              }
+              className="bg-gray-800/90 hover:bg-gray-700/90 w-10 h-10 md:w-auto md:h-auto p-2 md:p-3 disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Repeat last message"
+            >
+              <RotateCcw className="w-4 h-4 md:w-5 md:h-5 text-white" />
+            </Button>
+
+            {/* Mute Button */}
             <Button
               variant="secondary"
               size="sm"
               onClick={() => setIsAudioEnabled(!isAudioEnabled)}
-              className="bg-gray-800/80 hover:bg-gray-700/80"
+              className="bg-gray-800/90 hover:bg-gray-700/90 w-10 h-10 md:w-auto md:h-auto p-2 md:p-3"
+              title={isAudioEnabled ? "Mute audio" : "Unmute audio"}
             >
               {isAudioEnabled ? (
-                <Volume2 className="w-4 h-4 text-white" />
+                <Volume2 className="w-4 h-4 md:w-5 md:h-5 text-white" />
               ) : (
-                <VolumeX className="w-4 h-4 text-white" />
+                <VolumeX className="w-4 h-4 md:w-5 md:h-5 text-white" />
               )}
             </Button>
           </div>
@@ -304,33 +344,34 @@ export function HeyGenComponent({
 
         {/* Speaking Indicator */}
         {isSpeaking && (
-          <div className="absolute top-4 left-4 bg-green-500/80 text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
-            <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-            Speaking...
-          </div>
-        )}
-
-        {/* Error Display */}
-        {error && (
-          <div className="absolute top-4 right-4 bg-red-500/80 text-white px-3 py-1 rounded-lg text-sm">
-            {error}
+          <div className="absolute top-2 left-2 md:top-4 md:left-4 bg-green-500/90 text-white px-2 py-1 md:px-3 md:py-1 rounded-full text-xs md:text-sm flex items-center gap-1 md:gap-2">
+            <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-white rounded-full animate-pulse"></div>
+            <span className="hidden sm:inline">Speaking...</span>
+            <span className="sm:hidden">🗣️</span>
           </div>
         )}
       </div>
 
       {/* Avatar Status */}
-      <div className="mt-2 text-xs text-center">
+      <div className="mt-1 md:mt-2 text-xs md:text-sm text-center">
         <span
-          className={`inline-flex items-center gap-1 ${
-            isConnected ? "text-green-400" : "text-gray-500"
+          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full ${
+            isConnected
+              ? "text-green-400 bg-green-400/10"
+              : "text-gray-500 bg-gray-500/10"
           }`}
         >
           <div
-            className={`w-2 h-2 rounded-full ${
+            className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${
               isConnected ? "bg-green-400" : "bg-gray-500"
             }`}
           ></div>
-          {isConnected ? "Avatar Connected" : "Avatar Disconnected"}
+          <span className="hidden sm:inline">
+            {isConnected ? "Avatar Connected" : "Avatar Disconnected"}
+          </span>
+          <span className="sm:hidden">
+            {isConnected ? "Connected" : "Disconnected"}
+          </span>
         </span>
       </div>
     </div>

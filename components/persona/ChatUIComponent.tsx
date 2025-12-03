@@ -128,6 +128,7 @@ export function ChatUIComponent({
             messages={messages}
             gender={persona.gender}
             onSwitchToChat={() => setShowMessages(true)}
+            selectedConversationId={selectedConversationId}
           />
         )}
       </div>
