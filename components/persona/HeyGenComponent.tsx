@@ -3,21 +3,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Video, VideoOff, Volume2, VolumeX } from "lucide-react";
+import StreamingAvatar, { StartAvatarRequest } from "@heygen/streaming-avatar";
 
 interface HeyGenComponentProps {
   messages: any[];
-}
-
-interface StreamingAvatarApi {
-  createStartAvatar: (config: any) => Promise<void>;
-  speak: (text: string) => Promise<void>;
-  closeAvatar: () => Promise<void>;
-}
-
-declare global {
-  interface Window {
-    StreamingAvatarApi: new (config: any) => StreamingAvatarApi;
-  }
 }
 
 export function HeyGenComponent({ messages }: HeyGenComponentProps) {
@@ -28,11 +17,11 @@ export function HeyGenComponent({ messages }: HeyGenComponentProps) {
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
   const [isMicEnabled, setIsMicEnabled] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sdkReady, setSdkReady] = useState(false);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
-  const avatarApiRef = useRef<StreamingAvatarApi | null>(null);
+  const avatarApiRef = useRef<StreamingAvatar | null>(null);
+  const lastSpokenMessageRef = useRef<string | null>(null);
 
   // HeyGen configuration
   const heygenConfig = {
@@ -46,93 +35,19 @@ export function HeyGenComponent({ messages }: HeyGenComponentProps) {
     language: "en",
   };
 
-  // Initialize HeyGen SDK with retries/fallback URLs
+  // Set API key directly - SDK handles session creation internally
   useEffect(() => {
-    const loadHeyGenSDK = async () => {
-      try {
-        if (window.StreamingAvatarApi) {
-          setSdkReady(true);
-          return;
-        }
-
-        const candidateUrls = [
-          "https://resource.heygen.ai/streaming-avatar/streaming_avatar.js",
-          // Fallback CDN candidates
-          "https://cdn.heygen.com/streaming-avatar/streaming_avatar.js",
-          "https://static.heygen.com/streaming-avatar/streaming_avatar.js",
-        ];
-
-        let loaded = false;
-        for (const url of candidateUrls) {
-          await new Promise<void>((resolve) => {
-            const script = document.createElement("script");
-            script.src = url;
-            script.async = true;
-            script.onload = () => {
-              console.log("HeyGen SDK loaded successfully from:", url);
-              loaded = true;
-              setSdkReady(true);
-              resolve();
-            };
-            script.onerror = () => {
-              console.warn("Failed to load HeyGen SDK from:", url);
-              resolve();
-            };
-            document.head.appendChild(script);
-          });
-          if (loaded) break;
-        }
-
-        if (!loaded) {
-          setError(
-            "Unable to load HeyGen SDK. Check network/DNS and allowlist the SDK URL."
-          );
-        }
-      } catch (err) {
-        console.error("Failed to load HeyGen SDK:", err);
-        setError("Failed to load HeyGen SDK");
-      }
-    };
-
-    loadHeyGenSDK();
-  }, []);
-
-  // Fetch server-side session token per HeyGen Quick Start
-  useEffect(() => {
-    const fetchSession = async () => {
-      try {
-        const resp = await fetch("/api/heygen/session");
-        const json = await resp.json();
-        if (resp.ok) {
-          // Common patterns: json.token or json.data.token
-          const token =
-            json.token ||
-            json.data?.token ||
-            json.session_token ||
-            json.access_token;
-          if (!token) {
-            console.warn(
-              "HeyGen session response did not include token:",
-              json
-            );
-          }
-          setSessionToken(token || null);
-        } else {
-          setError(json.error || "Failed to create HeyGen session");
-        }
-      } catch (e: any) {
-        setError(e?.message || "Failed to call HeyGen session endpoint");
-      }
-    };
-    fetchSession();
+    // SDK will use this API key to create sessions internally
+    const apiKey = process.env.NEXT_PUBLIC_HEYGEN_API_KEY;
+    if (apiKey) {
+      setSessionToken(apiKey);
+    } else {
+      setError("HeyGen API key not configured in environment");
+    }
   }, []);
 
   // Start avatar session
   const startAvatar = useCallback(async () => {
-    if (!window.StreamingAvatarApi) {
-      setError("HeyGen SDK not loaded");
-      return;
-    }
     if (!sessionToken) {
       setError("HeyGen session token not available");
       return;
@@ -142,35 +57,54 @@ export function HeyGenComponent({ messages }: HeyGenComponentProps) {
     setError(null);
 
     try {
-      // Per Quick Start, constructor typically accepts token / signaling config
-      avatarApiRef.current = new window.StreamingAvatarApi({
-        token: sessionToken,
-        serverUrl: heygenConfig.serverUrl,
+      // Initialize StreamingAvatar with API key - SDK handles session creation
+      avatarApiRef.current = new StreamingAvatar({
+        token: sessionToken, // This should be the API key
       });
 
-      await avatarApiRef.current.createStartAvatar({
-        avatar_id: heygenConfig.avatarId,
-        quality: heygenConfig.quality,
+      const startRequest: StartAvatarRequest = {
+        avatarName: heygenConfig.avatarId,
+        quality: heygenConfig.quality as any,
         language: heygenConfig.language,
-        video_element: videoRef.current,
-      });
+        disableIdleTimeout: true,
+        useSilencePrompt: true,
+        // Disable knowledge base and conversational AI
+        knowledgeId: undefined,
+        knowledgeBase: undefined,
+      };
+
+      console.log("Starting avatar with request:", startRequest);
+      const response =
+        await avatarApiRef.current.createStartAvatar(startRequest);
+      console.log("Avatar createStartAvatar response:", response);
+
+      // Connect the video element to the media stream
+      if (avatarApiRef.current.mediaStream && videoRef.current) {
+        videoRef.current.srcObject = avatarApiRef.current.mediaStream;
+        console.log("Connected media stream to video element");
+      } else {
+        console.warn("No media stream available or video ref missing");
+      }
 
       setIsConnected(true);
-      console.log("Avatar started successfully");
-    } catch (err) {
+      console.log("Avatar started successfully", response);
+    } catch (err: any) {
       console.error("Failed to start avatar:", err);
-      setError("Failed to connect to avatar");
+      console.error("Error details:", err.message, err.status, err.body);
+      setError(
+        `Failed to connect to avatar: ${err.message || "Unknown error"}`
+      );
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [sessionToken, heygenConfig]);
 
   // Stop avatar session
   const stopAvatar = useCallback(async () => {
     if (!avatarApiRef.current) return;
 
     try {
-      await avatarApiRef.current.closeAvatar();
+      await avatarApiRef.current.stopAvatar();
       avatarApiRef.current = null;
       setIsConnected(false);
       console.log("Avatar stopped successfully");
@@ -190,8 +124,11 @@ export function HeyGenComponent({ messages }: HeyGenComponentProps) {
 
       setIsSpeaking(true);
       try {
-        await avatarApiRef.current.speak(text);
-        console.log("Avatar speaking:", text);
+        await avatarApiRef.current.speak({
+          text,
+          taskType: "repeat", // Force repeat mode to avoid AI generation
+        });
+        console.log("Avatar speaking (repeat mode):", text);
       } catch (err) {
         console.error("Failed to make avatar speak:", err);
         setError("Failed to make avatar speak");
@@ -202,12 +139,12 @@ export function HeyGenComponent({ messages }: HeyGenComponentProps) {
     [isConnected]
   );
 
-  // Auto-start avatar after SDK and session are ready
+  // Auto-start avatar when session token is ready
   useEffect(() => {
-    if (sdkReady && sessionToken && !isConnected && !isLoading) {
+    if (sessionToken && !isConnected && !isLoading) {
       startAvatar();
     }
-  }, [sdkReady, sessionToken, isConnected, isLoading, startAvatar]);
+  }, [sessionToken, isConnected, isLoading, startAvatar]);
 
   // Log when video element receives a stream (if SDK attaches MediaStream)
   useEffect(() => {
@@ -220,15 +157,28 @@ export function HeyGenComponent({ messages }: HeyGenComponentProps) {
     return () => video.removeEventListener("loadeddata", handler);
   }, []);
 
-  // Auto-speak last message when messages change or when avatar connects
+  // Auto-speak assistant messages when avatar connects or new messages arrive
   useEffect(() => {
     if (!isConnected || !messages.length || isSpeaking) return;
 
     const lastMessage = messages[messages.length - 1];
-    if (lastMessage && lastMessage.content) {
-      speakText(lastMessage.content);
+
+    // Only speak if it's an assistant message and we haven't spoken it before
+    if (
+      lastMessage &&
+      lastMessage.content &&
+      lastMessage.role === "assistant" &&
+      lastSpokenMessageRef.current !== lastMessage.content
+    ) {
+      console.log("Auto-speaking assistant message:", lastMessage.content);
+      lastSpokenMessageRef.current = lastMessage.content;
+
+      // Add a small delay to ensure avatar is fully ready
+      setTimeout(() => {
+        speakText(lastMessage.content);
+      }, 500);
     }
-  }, [messages, isConnected, isSpeaking, speakText]);
+  }, [messages, isConnected, isSpeaking]);
 
   // Cleanup on unmount
   useEffect(() => {
