@@ -30,6 +30,7 @@ export function ChatUIComponent({
   sending,
   onSendMessage,
   showMessages,
+  setShowMessages,
   messagesEndRef,
 }: ChatUIComponentProps) {
   return (
@@ -45,6 +46,14 @@ export function ChatUIComponent({
           </p>
         </div>
         <div className="flex items-center gap-4">
+          <Button
+            onClick={() => setShowMessages(!showMessages)}
+            variant="secondary"
+            size="sm"
+            className="bg-gray-700 hover:bg-gray-600 text-gray-100"
+          >
+            {showMessages ? "🎥 Avatar" : "💬 Messages"}
+          </Button>
           {selectedConversationId && (
             <span className="text-xs text-gray-500">
               #{selectedConversationId}
@@ -115,7 +124,11 @@ export function ChatUIComponent({
             <div ref={messagesEndRef} />
           </>
         ) : (
-          <HeyGenComponent messages={messages} />
+          <HeyGenComponent
+            messages={messages}
+            gender={persona.gender}
+            onSwitchToChat={() => setShowMessages(true)}
+          />
         )}
       </div>
 

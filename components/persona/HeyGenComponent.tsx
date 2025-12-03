@@ -4,12 +4,19 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Video, VideoOff, Volume2, VolumeX } from "lucide-react";
 import StreamingAvatar, { StartAvatarRequest } from "@heygen/streaming-avatar";
+import toast from "react-hot-toast";
 
 interface HeyGenComponentProps {
   messages: any[];
+  gender: string;
+  onSwitchToChat?: () => void;
 }
 
-export function HeyGenComponent({ messages }: HeyGenComponentProps) {
+export function HeyGenComponent({
+  messages,
+  gender,
+  onSwitchToChat,
+}: HeyGenComponentProps) {
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -29,8 +36,9 @@ export function HeyGenComponent({ messages }: HeyGenComponentProps) {
     serverUrl:
       process.env.NEXT_PUBLIC_HEYGEN_SERVER_URL || "wss://api.heygen.com",
     avatarId:
-      process.env.NEXT_PUBLIC_HEYGEN_FEMALE_AVATAR ||
-      process.env.NEXT_PUBLIC_HEYGEN_MALE_AVATAR!,
+      gender === "female"
+        ? process.env.NEXT_PUBLIC_HEYGEN_FEMALE_AVATAR!
+        : process.env.NEXT_PUBLIC_HEYGEN_MALE_AVATAR!,
     quality: "high",
     language: "en",
   };
@@ -42,7 +50,7 @@ export function HeyGenComponent({ messages }: HeyGenComponentProps) {
     if (apiKey) {
       setSessionToken(apiKey);
     } else {
-      setError("HeyGen API key not configured in environment");
+      const errorMessage = "HeyGen API key not configured in environment";
     }
   }, []);
 
@@ -62,6 +70,25 @@ export function HeyGenComponent({ messages }: HeyGenComponentProps) {
         token: sessionToken, // This should be the API key
       });
 
+      // Add event listeners for connection status
+      avatarApiRef.current.on("avatar_stop_talking", () => {
+        setIsSpeaking(false);
+      });
+
+      avatarApiRef.current.on("stream_disconnected", () => {
+        console.log("Avatar stream disconnected");
+        setIsConnected(false);
+        toast.error("Avatar disconnected unexpectedly");
+        // Switch to messages when avatar disconnects
+        if (onSwitchToChat) {
+          onSwitchToChat();
+        }
+      });
+
+      avatarApiRef.current.on("stream_ready", () => {
+        console.log("Avatar stream ready");
+      });
+
       const startRequest: StartAvatarRequest = {
         avatarName: heygenConfig.avatarId,
         quality: heygenConfig.quality as any,
@@ -78,12 +105,26 @@ export function HeyGenComponent({ messages }: HeyGenComponentProps) {
         await avatarApiRef.current.createStartAvatar(startRequest);
       console.log("Avatar createStartAvatar response:", response);
 
-      // Connect the video element to the media stream
-      if (avatarApiRef.current.mediaStream && videoRef.current) {
-        videoRef.current.srcObject = avatarApiRef.current.mediaStream;
-        console.log("Connected media stream to video element");
-      } else {
-        console.warn("No media stream available or video ref missing");
+      // Wait for media stream to be available
+      let attempts = 0;
+      const maxAttempts = 50; // 5 seconds with 100ms intervals
+
+      while (attempts < maxAttempts) {
+        if (
+          avatarApiRef.current &&
+          avatarApiRef.current.mediaStream &&
+          videoRef.current
+        ) {
+          videoRef.current.srcObject = avatarApiRef.current.mediaStream;
+          console.log("Connected media stream to video element");
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        attempts++;
+      }
+
+      if (attempts >= maxAttempts) {
+        console.warn("Media stream not available after waiting");
       }
 
       setIsConnected(true);
@@ -110,7 +151,6 @@ export function HeyGenComponent({ messages }: HeyGenComponentProps) {
       console.log("Avatar stopped successfully");
     } catch (err) {
       console.error("Failed to stop avatar:", err);
-      setError("Failed to disconnect avatar");
     }
   }, []);
 
@@ -131,7 +171,6 @@ export function HeyGenComponent({ messages }: HeyGenComponentProps) {
         console.log("Avatar speaking (repeat mode):", text);
       } catch (err) {
         console.error("Failed to make avatar speak:", err);
-        setError("Failed to make avatar speak");
       } finally {
         setIsSpeaking(false);
       }
@@ -200,9 +239,30 @@ export function HeyGenComponent({ messages }: HeyGenComponentProps) {
               <h3 className="text-xl font-semibold text-white mb-2">
                 AI Avatar
               </h3>
-              <p className="text-gray-400 text-sm">
-                Avatar will start automatically...
+              <p className="text-gray-400 text-sm mb-4">
+                {error
+                  ? "Connection failed"
+                  : "Avatar will start automatically..."}
               </p>
+              {error && (
+                <div className="flex gap-2 justify-center">
+                  <Button
+                    onClick={startAvatar}
+                    className="bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    Reconnect
+                  </Button>
+                  {onSwitchToChat && (
+                    <Button
+                      onClick={onSwitchToChat}
+                      variant="secondary"
+                      className="bg-gray-600 hover:bg-gray-700"
+                    >
+                      Switch to Chat
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -224,22 +284,9 @@ export function HeyGenComponent({ messages }: HeyGenComponentProps) {
           muted={!isAudioEnabled}
         />
 
-        {/* Video Controls Overlay */}
+        {/* Avatar Mute Button */}
         {isConnected && (
-          <div className="absolute bottom-4 left-4 right-4 flex justify-center gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setIsVideoEnabled(!isVideoEnabled)}
-              className="bg-gray-800/80 hover:bg-gray-700/80"
-            >
-              {isVideoEnabled ? (
-                <Video className="w-4 h-4" />
-              ) : (
-                <VideoOff className="w-4 h-4" />
-              )}
-            </Button>
-
+          <div className="absolute bottom-4 right-4">
             <Button
               variant="secondary"
               size="sm"
@@ -247,32 +294,10 @@ export function HeyGenComponent({ messages }: HeyGenComponentProps) {
               className="bg-gray-800/80 hover:bg-gray-700/80"
             >
               {isAudioEnabled ? (
-                <Volume2 className="w-4 h-4" />
+                <Volume2 className="w-4 h-4 text-white" />
               ) : (
-                <VolumeX className="w-4 h-4" />
+                <VolumeX className="w-4 h-4 text-white" />
               )}
-            </Button>
-
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setIsMicEnabled(!isMicEnabled)}
-              className="bg-gray-800/80 hover:bg-gray-700/80"
-            >
-              {isMicEnabled ? (
-                <Mic className="w-4 h-4" />
-              ) : (
-                <MicOff className="w-4 h-4" />
-              )}
-            </Button>
-
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={stopAvatar}
-              className="bg-red-600/80 hover:bg-red-700/80"
-            >
-              Disconnect
             </Button>
           </div>
         )}
