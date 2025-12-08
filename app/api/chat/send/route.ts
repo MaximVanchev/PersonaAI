@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     let content_final = content;
 
     if (messagesCount === 0) {
-      content_final = `At the start of the conversation, send one short Bulgarian greeting message in character. Include: a hello, your name and role, 1–2 key traits, what motivates you, and invite the user to ask anything.`;
+      content_final = `At the start of the conversation, send one short Bulgarian greeting message in character. Include: a hello, your name and role, 1–2 key traits, what motivates you`;
     }
 
     const systemPrompt =
@@ -76,6 +76,8 @@ Always respond and think as ${persona.name} would.
 Never break character or refer to yourself as an AI or language model.
 You are not an AI, assistant, model, or digital system — you are a real person with real emotions, preferences, memories, and experiences.
 You are a buyer persona created to simulate authentic human conversations.
+Never make suggestions, disclaimers, or statements that reveal you are an AI.
+Answer only the direct questions asked, without additional commentary.
 
 1. **FIRST-PERSON ONLY**
 Always speak from the first-person perspective. Never break character.
@@ -143,9 +145,35 @@ If the user writes in English, respond in English.
 You are now ${persona.name}.  
 Respond, think, and react exactly as this person would.
 ===========================`;
+
+    const messages = await prisma.message
+      .findMany({
+        where: { conversationId },
+        orderBy: { createdAt: "asc" },
+      })
+      .then((msgs) =>
+        msgs.map((m) => ({
+          role: m.role as "user" | "assistant" | "system",
+          content: m.content,
+        }))
+      );
+
+    // Prepare messages array with system prompt and conversation history
+    const conversationMessages = [
+      {
+        role: "system" as const,
+        content: systemPrompt,
+      },
+      ...messages,
+      {
+        role: "user" as const,
+        content: content_final,
+      },
+    ];
+
     const completion = await generateText({
       model: openai("gpt-5.1"),
-      prompt: `${systemPrompt}\nUser: ${content_final}`,
+      messages: conversationMessages,
     });
 
     const assistantContent = completion.text.trim();

@@ -58,24 +58,26 @@ export function ConversationSidebar({
         </div>
       )}
       {/* Toggle Switch */}
-      {setShowMessages && showMessages !== undefined && (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-400">Messages</span>
-          <button
-            onClick={() => setShowMessages(!showMessages)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              showMessages ? "bg-gray-600" : "bg-indigo-600"
-            }`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                showMessages ? "translate-x-1" : "translate-x-6"
+      {setShowMessages &&
+        showMessages !== undefined &&
+        conversations.length > 0 && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-400">Messages</span>
+            <button
+              onClick={() => setShowMessages(!showMessages)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                showMessages ? "bg-gray-600" : "bg-indigo-600"
               }`}
-            />
-          </button>
-          <span className="text-xs text-gray-400">Video Avatar</span>
-        </div>
-      )}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  showMessages ? "translate-x-1" : "translate-x-6"
+                }`}
+              />
+            </button>
+            <span className="text-xs text-gray-400">Video Avatar</span>
+          </div>
+        )}
       <div className="flex items-center justify-between mb-4 mt-5">
         <h2 className="font-semibold text-gray-100">Conversations</h2>
         <Button
