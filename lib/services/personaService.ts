@@ -44,11 +44,12 @@ REQUIREMENTS:
 2. All details must logically fit together (age ↔ career level, biography ↔ expertise, tone ↔ role, etc.).
 3. All names must be Bulgarian.
 4. All content must be realistic, culturally appropriate, and believable.
-5. Output only valid JSON with no commentary outside the JSON structure..`,
+5. Output only valid JSON with no commentary outside the JSON structure..
+6. Dont generate personas using any of the file names or internal sheets.`,
         },
         {
           role: "user",
-          content: `Generate a total of ${params.maleCount + params.femaleCount} unique personas with properties in English. ${params.maleCount} should be male and ${params.femaleCount} should be female. Use the following files as the only source of information for the personas you create: ${params.files.map((f) => f.fileName).join(", ")}. `,
+          content: `Generate a total of ${params.maleCount + params.femaleCount} unique personas with properties in English. ${params.maleCount} should be male and ${params.femaleCount} should be female. Use the following files as the only source of information for the personas you create: ${params.files.map((f) => f.content).join(", ")}. `,
         },
       ],
     });

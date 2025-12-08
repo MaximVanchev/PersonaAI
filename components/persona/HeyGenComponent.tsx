@@ -6,6 +6,7 @@ import { Volume2, VolumeX, RotateCcw } from "lucide-react";
 import StreamingAvatar, {
   StartAvatarRequest,
   TaskType,
+  VoiceEmotion,
 } from "@heygen/streaming-avatar";
 
 interface HeyGenComponentProps {
@@ -133,7 +134,7 @@ export function HeyGenComponent({
         // Additional settings to prevent disconnection
         voice: {
           rate: 1.0,
-          emotion: "neutral",
+          emotion: VoiceEmotion.FRIENDLY,
         },
       };
 
@@ -172,8 +173,8 @@ export function HeyGenComponent({
         if (avatarApiRef.current && isConnected) {
           try {
             // Only check for critical connection failures, not inactivity
-            const connectionState = avatarApiRef.current.connectionState;
-            if (connectionState === "failed") {
+            const connectionState = avatarApiRef.current.connectionQuality;
+            if (connectionState === "BAD") {
               console.log(
                 "Connection health check failed, state:",
                 connectionState
