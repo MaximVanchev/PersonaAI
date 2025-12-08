@@ -5,7 +5,13 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export default async function Settings() {
-  const filesNames = await getFilesNames();
+  let filesNames;
+  try {
+    filesNames = await getFilesNames();
+  } catch (error) {
+    console.log("Failed to fetch file names during build:", error);
+    filesNames = null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-slate-800 flex items-center justify-center py-12 px-4">

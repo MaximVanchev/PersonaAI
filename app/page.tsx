@@ -6,7 +6,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default async function Home() {
-  const personas = await getListPersonas();
+  let personas;
+  try {
+    personas = await getListPersonas();
+  } catch (error) {
+    console.log("Failed to fetch personas during build:", error);
+    personas = null;
+  }
   const personaList = Array.isArray(personas) ? personas : [];
 
   return (

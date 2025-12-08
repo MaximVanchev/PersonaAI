@@ -1,14 +1,33 @@
 import { ConvertedFileDto, FileListDto } from "@/types/index.type";
 
 export async function getFilesNames(): Promise<FileListDto[] | null> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  // Use absolute URL for server-side rendering, relative for client-side
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL?.trim();
+  const isServer = typeof window === "undefined";
 
-  const res = await fetch(`${baseUrl}/api/file/names`);
+  let url: string;
+  if (isServer) {
+    // Server-side: use localhost or provided base URL
+    url = baseUrl || "http://localhost:3000";
+  } else {
+    // Client-side: use provided base URL or empty for relative URLs
+    url = baseUrl || "";
+  }
 
-  const data = await res.json();
+  const res = await fetch(`${url}/api/file/names`);
 
   if (!res.ok) {
-    throw new Error(data.message || "Failed to fetch file names");
+    throw new Error(
+      `Failed to fetch file names: ${res.status} ${res.statusText}`
+    );
+  }
+
+  const text = await res.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    throw new Error(`Invalid JSON response: ${text.substring(0, 100)}`);
   }
 
   return data.filesNames as FileListDto[];
