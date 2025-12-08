@@ -29,9 +29,10 @@ export async function generatePersonasRequest(
 }
 
 export async function getListPersonas(): Promise<PersonaListDto[] | null> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL?.trim();
+  const safeBase = baseUrl && baseUrl.length > 0 ? baseUrl : "";
 
-  const res = await fetch(`${baseUrl}/api/persona/all`);
+  const res = await fetch(`${safeBase}/api/persona/all`);
 
   const data = await res.json();
 
@@ -45,9 +46,10 @@ export async function getListPersonas(): Promise<PersonaListDto[] | null> {
 export async function getPersonaById(
   id: number
 ): Promise<PersonaChatDto | null> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL?.trim();
+  const safeBase = baseUrl && baseUrl.length > 0 ? baseUrl : "";
 
-  const res = await fetch(`${baseUrl}/api/persona/${id}`, {
+  const res = await fetch(`${safeBase}/api/persona/${id}`, {
     method: "GET",
   });
 
