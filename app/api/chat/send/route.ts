@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     let content_final = content;
 
     if (messagesCount === 0) {
-      content_final = `At the start of the conversation, send one short Bulgarian greeting message in character. Include: a hello, your name and role, 1–2 key traits, what motivates you`;
+      content_final = `At the start of the conversation, send one short Bulgarian greeting message in character. Include: a hello, your name , age and role, 1–2 key traits, what motivates you`;
     }
 
     const systemPrompt =

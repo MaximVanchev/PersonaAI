@@ -4,18 +4,61 @@ import { useState } from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
-import { Minus, Plus } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { Minus, Plus, ChevronDown } from "lucide-react";
 import toster from "react-hot-toast";
 import { generatePersonasRequest } from "@/lib/api/persona.request";
 import {
-  PersonaCountDto,
   PersonaGeneratorDto,
+  PersonaGeneratorDataDto,
+  GenerationDto,
 } from "@/types/shared/persona.type";
 import { useRouter } from "next/navigation";
+
+const GENERATIONS: GenerationDto[] = [
+  {
+    name: "Gen Z",
+    startYear: 1997,
+    endYear: 2012,
+    description: "Born 1997-2012",
+  },
+  {
+    name: "Millennials",
+    startYear: 1981,
+    endYear: 1996,
+    description: "Born 1981-1996",
+  },
+  {
+    name: "Gen X",
+    startYear: 1965,
+    endYear: 1980,
+    description: "Born 1965-1980",
+  },
+  {
+    name: "Baby Boomers",
+    startYear: 1946,
+    endYear: 1964,
+    description: "Born 1946-1964",
+  },
+  {
+    name: "Silent Generation",
+    startYear: 1928,
+    endYear: 1945,
+    description: "Born 1928-1945",
+  },
+];
 
 export function GenerateForm(params: { personaCount: number }) {
   const [maleCount, setMaleCount] = useState(1);
   const [femaleCount, setFemaleCount] = useState(1);
+  const [selectedGeneration, setSelectedGeneration] =
+    useState<GenerationDto | null>(null); // No default selection
+
   const [busy, setBusy] = useState(false);
   const router = useRouter();
 
@@ -30,10 +73,17 @@ export function GenerateForm(params: { personaCount: number }) {
     }
 
     try {
-      await generatePersonasRequest({
+      const requestData: PersonaGeneratorDataDto = {
         maleCount,
         femaleCount,
-      } as PersonaCountDto);
+        generation: selectedGeneration || undefined,
+      };
+
+      if (selectedGeneration) {
+        requestData.generation = selectedGeneration;
+      }
+
+      await generatePersonasRequest(requestData);
 
       console.log("Personas generated successfully");
       toster.success("Personas generated successfully!");
@@ -120,6 +170,58 @@ export function GenerateForm(params: { personaCount: number }) {
               </Button>
             </div>
           </div>
+        </div>
+        <div className="flex flex-col items-center gap-3 mb-6">
+          <Label className="text-sm font-medium text-gray-200">
+            Generation
+          </Label>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <div className="w-32 h-10 flex items-center justify-center bg-gray-700 rounded-md border border-gray-600 cursor-pointer hover:bg-gray-600 transition-colors">
+                <div className="flex flex-col items-center">
+                  <span className="text-sm font-semibold text-white leading-tight">
+                    {selectedGeneration ? selectedGeneration.name : "Any"}
+                  </span>
+                  {selectedGeneration && (
+                    <span className="text-xs text-gray-400 leading-tight">
+                      {selectedGeneration.startYear}-
+                      {selectedGeneration.endYear}
+                    </span>
+                  )}
+                  {!selectedGeneration && (
+                    <span className="text-xs text-gray-400 leading-tight">
+                      Optional
+                    </span>
+                  )}
+                </div>
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-48 bg-gray-800 border-gray-600">
+              <DropdownMenuItem
+                onClick={() => setSelectedGeneration(null)}
+                className="text-gray-200 hover:bg-gray-700 focus:bg-gray-700 cursor-pointer"
+              >
+                <div className="flex flex-col">
+                  <span className="font-medium">Any Generation</span>
+                  <span className="text-xs text-gray-400">No preference</span>
+                </div>
+              </DropdownMenuItem>
+              {GENERATIONS.map((generation) => (
+                <DropdownMenuItem
+                  key={generation.name}
+                  onClick={() => setSelectedGeneration(generation)}
+                  className="text-gray-200 hover:bg-gray-700 focus:bg-gray-700 cursor-pointer"
+                >
+                  <div className="flex flex-col">
+                    <span className="font-medium">{generation.name}</span>
+                    <span className="text-xs text-gray-400">
+                      {generation.description}
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <div className="rounded-full border border-gray-600 bg-gradient-to-r from-blue-600 to-purple-600 transition-colors flex items-center text-white gap-2 hover:from-blue-700 hover:to-purple-700 text-[1.3rem] font-medium h-15 px-4 mx-auto shadow-lg">
           <button

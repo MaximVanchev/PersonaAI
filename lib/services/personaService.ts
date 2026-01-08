@@ -49,7 +49,7 @@ REQUIREMENTS:
         },
         {
           role: "user",
-          content: `Generate a total of ${params.maleCount + params.femaleCount} unique personas with properties in English. ${params.maleCount} should be male and ${params.femaleCount} should be female. Use the following files as the only source of information for the personas you create: ${params.files.map((f) => f.content).join(", ")}. `,
+          content: `Generate a total of ${params.maleCount + params.femaleCount}, born between ${params.generation?.startYear} and ${params.generation?.endYear}, unique personas with properties in English. ${params.maleCount} should be male and ${params.femaleCount} should be female. Use the following files as the only source of information for the personas you create: ${params.files.map((f) => f.content).join(", ")}. `,
         },
       ],
     });

@@ -1,6 +1,6 @@
 import {
   HTTP_STATUS_CODES,
-  PersonaCountDto,
+  PersonaGeneratorDataDto,
   PersonaDto,
   PersonaGeneratorDto,
 } from "@/types/index.type";
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const requestData = (await req.json()) as PersonaCountDto;
+    const requestData = (await req.json()) as PersonaGeneratorDataDto;
     console.log("Received request data:", requestData);
 
     const files = await prisma.file.findMany();

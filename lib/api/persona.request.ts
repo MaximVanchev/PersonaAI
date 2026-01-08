@@ -1,13 +1,13 @@
 import {
   PersonaChatDto,
-  PersonaCountDto,
   PersonaDto,
+  PersonaGeneratorDataDto,
   PersonaGeneratorDto,
   PersonaListDto,
 } from "@/types/index.type";
 
 export async function generatePersonasRequest(
-  params: PersonaCountDto
+  params: PersonaGeneratorDataDto
 ): Promise<PersonaDto[] | null> {
   //validateFileParams(params);
 
